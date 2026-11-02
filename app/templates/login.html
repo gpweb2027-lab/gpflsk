@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Game Platform — Login{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">{% endblock %}
+{% block content %}
+<main class="login-shell"><section class="login-panel" aria-labelledby="login-title">
+  <div class="login-brand"><span class="login-brand-icon">✦</span><span>Game Platform</span></div>
+  <div class="login-intro"><h1 id="login-title" data-i18n="title"></h1><p data-i18n="subtitle"></p></div>
+  <form id="login-form" class="login-form">
+    <label for="username" data-i18n="username"></label>
+    <div class="input-wrap"><span class="field-icon" aria-hidden="true">♙</span><input id="username" name="username" type="text" autocomplete="username" required maxlength="150" data-i18n-placeholder="usernamePlaceholder"></div>
+    <label for="password" data-i18n="password"></label>
+    <div class="input-wrap"><span class="field-icon" aria-hidden="true">♙</span><input id="password" name="password" type="password" autocomplete="current-password" required data-i18n-placeholder="passwordPlaceholder"><button id="password-toggle" class="password-toggle" type="button" data-i18n-aria="showPassword" aria-pressed="false" aria-controls="password"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+    <label class="remember-row" for="remember"><input id="remember" type="checkbox"><span data-i18n="remember"></span></label>
+    <button id="login-submit" class="login-submit" type="submit" data-i18n="submit"></button>
+    <p id="login-feedback" class="login-feedback" role="alert" aria-live="polite" hidden></p>
+  </form>
+  <p class="login-register"><span data-i18n="noAccount"></span> <a href="/register" data-i18n="register"></a></p>
+</section></main>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/login-i18n.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/login.js') }}" defer></script>
+{% endblock %}

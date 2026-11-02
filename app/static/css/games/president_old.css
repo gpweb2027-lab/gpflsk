@@ -1,0 +1,1048 @@
+.president-table {
+    position: relative;
+
+    width: 100%;
+    min-height: 620px;
+
+    overflow: hidden;
+
+    border:
+        1px solid rgba(105, 85, 255, .28);
+
+    border-radius: 32px;
+
+    background:
+        radial-gradient(
+            ellipse at center,
+            #173b66 0%,
+            #0d294b 45%,
+            #08182e 100%
+        );
+
+    box-shadow:
+        inset 0 0 80px rgba(0, 0, 0, .28),
+        0 15px 40px rgba(0, 0, 0, .12);
+}
+
+.playing-card {
+    position: relative;
+
+    width: 76px;
+    height: 108px;
+
+    margin-left: -18px;
+
+    flex: 0 0 auto;
+
+    border: 2px solid #d8dfec;
+    border-radius: 10px;
+
+    color: #101828;
+    background: #f8fafc;
+
+    box-shadow:
+        0 8px 18px
+        rgba(0,0,0,.25);
+
+    cursor: pointer;
+
+    transition:
+        transform .18s ease,
+        border-color .18s ease;
+}
+
+.playing-card:first-child {
+    margin-left: 0;
+}
+
+
+/* =========================================================
+   MAIN COMPACTE STYLE PLATO
+   ========================================================= */
+
+.president-local-hand .hand {
+    width: max-content;
+    max-width: 760px;
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+
+    overflow: visible;
+
+    padding: 8px 20px;
+}
+
+
+/* cartes de la main */
+
+.president-local-hand .playing-card {
+    width: 62px;
+    height: 90px;
+
+    margin-left: -30px;
+
+    flex: 0 0 62px;
+
+    transition:
+        transform .18s ease,
+        border-color .18s ease;
+}
+
+
+/* première carte entièrement visible */
+
+.president-local-hand .playing-card:first-child {
+    margin-left: 0;
+}
+
+
+/* carte sélectionnée */
+
+.president-local-hand .playing-card.selected {
+    transform: translateY(-14px);
+}
+
+
+/* rang et symbole adaptés à la nouvelle taille */
+
+.president-local-hand .card-rank {
+    left: 7px;
+    top: 5px;
+
+    font-size: 16px;
+}
+
+.president-local-hand .card-suit {
+    font-size: 25px;
+}
+
+.playing-card:hover {
+    transform: translateY(-10px);
+}
+
+.playing-card.selected {
+    transform: translateY(-18px);
+
+    border-color: #8652ff;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(134, 82, 255, .20),
+        0 12px 25px
+        rgba(0,0,0,.35);
+}
+
+.card-rank {
+    position: absolute;
+
+    left: 8px;
+    top: 6px;
+
+    font-size: 18px;
+    font-weight: 900;
+}
+
+.card-suit {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform:
+        translate(-50%, -50%);
+
+    font-size: 31px;
+}
+
+.mini-card {
+    width: 54px;
+    height: 76px;
+
+    display: grid;
+    place-items: center;
+
+    border: 2px solid #d8dfec;
+    border-radius: 8px;
+
+    color: #111827;
+    background: white;
+
+    font-size: 16px;
+    font-weight: 900;
+
+    box-shadow:
+        0 7px 16px
+        rgba(0,0,0,.25);
+}
+
+.card-suit.red-suit {
+    color: #dc2626;
+}
+
+.results {
+    margin-bottom: 15px;
+
+    color: #9aabca;
+
+    font-size: 11px;
+}
+
+.president-turn-timer {
+    margin: 14px 0 20px;
+    padding: 12px 14px;
+
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    border-radius: 14px;
+
+    background: rgba(15, 23, 42, 0.55);
+}
+
+.president-turn-timer.hidden {
+    display: none;
+}
+
+.president-turn-timer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 8px;
+
+    font-size: 0.9rem;
+}
+
+#president-turn-time {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.president-turn-timer-track {
+    width: 100%;
+    height: 8px;
+
+    overflow: hidden;
+
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.president-turn-timer-progress {
+    width: 100%;
+    height: 100%;
+
+    border-radius: inherit;
+
+    background: linear-gradient(
+        90deg,
+        #6366f1,
+        #8b5cf6,
+        #a855f7
+    );
+
+    transition:
+        width 0.15s linear,
+        filter 0.2s ease;
+}
+
+.president-turn-timer.expiring
+.president-turn-timer-progress {
+    filter:
+        brightness(1.35)
+        saturate(1.5);
+}
+
+.president-turn-timer.expired
+.president-turn-timer-progress {
+    width: 0%;
+}
+
+/* =========================================================
+   TABLE PRESIDENT - JOUEURS
+   ========================================================= */
+
+.president-table-players {
+    position: absolute;
+    inset: 0;
+
+    z-index: 3;
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   CENTRE DE LA TABLE
+   ========================================================= */
+
+.president-table-center {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 160px;
+    min-height: 130px;
+
+    padding: 18px 24px;
+
+    border-radius: 22px;
+
+    background:
+        rgba(5, 15, 30, 0.22);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.04);
+
+    z-index: 2;
+}
+
+.table-center-label {
+    margin-bottom: 12px;
+
+    color: #cbd5e1;
+
+    font-size: 0.72rem;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.played-cards {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 80px;
+}
+
+
+/* =========================================================
+   JOUEUR
+   ========================================================= */
+
+.president-table-player {
+    position: absolute;
+
+    width: 120px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 7px;
+
+    transform: translate(-50%, -50%);
+
+    text-align: center;
+
+    z-index: 4;
+}
+
+
+/* =========================================================
+   AVATAR
+   ========================================================= */
+
+.president-player-avatar {
+    position: relative;
+
+    width: 58px;
+    height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border:
+        2px solid rgba(139, 92, 246, 0.7);
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            135deg,
+            #4338ca,
+            #7c3aed
+        );
+
+    color: white;
+
+    font-size: 1.15rem;
+    font-weight: 900;
+
+    box-shadow:
+        0 7px 20px rgba(0, 0, 0, .35),
+        0 0 18px rgba(124, 58, 237, .18);
+}
+
+
+/* =========================================================
+   JOUEUR ACTIF
+   ========================================================= */
+
+.president-table-player.is-current
+.president-player-avatar {
+    border-color: #facc15;
+
+    box-shadow:
+        0 0 0 4px rgba(250, 204, 21, .12),
+        0 0 25px rgba(250, 204, 21, .30);
+}
+
+.president-player-active {
+    position: absolute;
+
+    right: -8px;
+    top: -8px;
+
+    width: 25px;
+    height: 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #111827;
+
+    font-size: 0.72rem;
+
+    box-shadow:
+        0 3px 10px rgba(0, 0, 0, .4);
+}
+
+
+/* =========================================================
+   JOUEUR CONNECTÉ
+   ========================================================= */
+
+.president-table-player.is-me
+.president-player-avatar {
+    width: 66px;
+    height: 66px;
+
+    border-color: #60a5fa;
+
+    background:
+        linear-gradient(
+            135deg,
+            #2563eb,
+            #7c3aed
+        );
+}
+
+
+/* =========================================================
+   INFOS JOUEUR
+   ========================================================= */
+
+.president-player-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 2px;
+
+    padding: 5px 10px;
+
+    border-radius: 10px;
+
+    background:
+        rgba(3, 10, 24, .55);
+
+    backdrop-filter: blur(8px);
+}
+
+.president-player-name {
+    max-width: 115px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: #f8fafc;
+
+    font-size: .76rem;
+    font-weight: 800;
+}
+
+.president-player-cards {
+    color: #9fb2d2;
+
+    font-size: .67rem;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .president-table {
+        min-height: 430px;
+    }
+
+    .president-player-avatar {
+        width: 48px;
+        height: 48px;
+    }
+
+    .president-table-player.is-me
+    .president-player-avatar {
+        width: 55px;
+        height: 55px;
+    }
+
+    .president-player-info {
+        padding: 4px 7px;
+    }
+
+    .president-player-name {
+        max-width: 90px;
+        font-size: .68rem;
+    }
+
+    .president-player-cards {
+        font-size: .6rem;
+    }
+}
+
+
+/* Cartes cachées des adversaires */
+
+.president-opponent-cards {
+    position: relative;
+
+    width: 58px;
+    height: 24px;
+
+    margin-top: -3px;
+}
+
+.president-card-back {
+    position: absolute;
+
+    left: 50%;
+    top: 0;
+
+    width: 19px;
+    height: 27px;
+
+    border: 1px solid rgba(255, 255, 255, .75);
+    border-radius: 4px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #4f46e5,
+            #7c3aed
+        );
+
+    box-shadow:
+        0 3px 7px rgba(0, 0, 0, .35);
+
+    transform:
+        translateX(
+            calc(-50% + (var(--card-index) - 2.5) * 6px)
+        )
+        rotate(
+            calc((var(--card-index) - 2.5) * 3deg)
+        );
+}
+
+/* =========================================================
+   BARRE DE TEMPS DU JOUEUR ACTIF
+   ========================================================= */
+
+.president-turn-mini-bar {
+    width: 78px;
+    height: 8px;
+
+    position: relative;
+
+    margin-top: 5px;
+    margin-left: 14px;
+
+    overflow: visible;
+
+    border-radius: 999px;
+
+    background: rgba(255,255,255,.14);
+
+    border:
+        1px solid rgba(255,255,255,.10);
+}
+
+.president-turn-clock {
+    position: absolute;
+
+    right: calc(100% + 5px);
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: #facc15;
+
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.president-turn-mini-progress {
+    width: 100%;
+    height: 100%;
+
+    border-radius: inherit;
+
+    background:
+        linear-gradient(
+            90deg,
+            #facc15,
+            #f59e0b
+        );
+
+    transition: width .05s linear;
+}
+
+.president-turn-mini-progress {
+    width: 100%;
+    height: 100%;
+
+    border-radius: inherit;
+
+    background:
+        linear-gradient(
+            90deg,
+            #facc15,
+            #f59e0b
+        );
+
+    transition:
+        width .05s linear;
+}
+
+.president-card-count {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 28px;
+    height: 22px;
+
+    margin-bottom: 3px;
+    padding: 0 7px;
+
+    border-radius: 999px;
+
+    background:
+        rgba(3, 10, 24, .82);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, .08);
+
+    color: #f8fafc;
+
+    font-size: .72rem;
+    font-weight: 900;
+
+    line-height: 1;
+}
+
+/* =========================================================
+   MAIN DU JOUEUR LOCAL
+   Comme pitchprime34 : compacte au-dessus de l'avatar
+   ========================================================= */
+
+/* =========================================================
+   MAIN DU JOUEUR LOCAL
+   Comme pitchprime34 : compacte au-dessus de l'avatar
+   ========================================================= */
+
+.president-local-hand {
+    position: absolute;
+
+    left: 50%;
+    bottom: 105px;
+
+    transform: translateX(-50%);
+
+    z-index: 15;
+
+    width: auto;
+    max-width: 72%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 9px;
+}
+
+
+/* rangée de cartes */
+
+.president-local-hand .hand {
+    width: auto;
+    max-width: 100%;
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+
+    margin: 0;
+    padding: 8px 12px;
+
+    overflow-x: auto;
+    overflow-y: visible;
+}
+
+
+/* rangée de cartes */
+
+.president-local-hand .hand {
+    width: auto;
+    max-width: 100%;
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+
+    margin: 0;
+    padding: 8px 12px;
+
+    overflow-x: auto;
+    overflow-y: visible;
+}
+
+
+/* =========================================================
+   ORGANISATION BAS DE TABLE
+   ========================================================= */
+
+/* Main compacte au-dessus du joueur local */
+.president-local-hand {
+    bottom: 115px;
+}
+
+
+/* Boutons juste sous les cartes */
+.president-hand-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 4px;
+}
+
+
+/* Joueur local tout en bas */
+.president-table-player.is-me {
+    top: auto !important;
+    bottom: 8px !important;
+
+    transform: translateX(-50%) !important;
+}
+
+
+/* Le centre reste réellement au centre */
+.president-table-center {
+    top: 43%;
+}
+
+.president-hidden-ui {
+    display: none !important;
+}
+
+.president-player-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.president-presence-dot {
+    width: 7px;
+    height: 7px;
+
+    flex: 0 0 7px;
+
+    border-radius: 50%;
+    background: #65d329;
+
+    box-shadow:
+        0 0 7px rgba(101, 211, 41, .55);
+}
+
+/* =========================================================
+   NETTOYAGE DE L'INTERFACE PRESIDENT
+   ========================================================= */
+
+.president-hidden-ui {
+    display: none !important;
+}
+
+
+/* La table devient la vraie surface de jeu complète */
+
+.game-panel {
+    position: relative;
+}
+
+
+.president-table {
+    position: relative;
+
+    min-height: 680px;
+
+    padding-bottom: 180px;
+}
+
+
+/* =========================================================
+   MAIN DU JOUEUR DANS LA TABLE
+   ========================================================= */
+
+.president-local-hand {
+    position: absolute;
+
+    left: 20px;
+    right: 20px;
+    bottom: 18px;
+
+    z-index: 20;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+.president-local-hand .hand {
+    width: 100%;
+
+    margin: 0;
+
+    display: flex;
+    align-items: flex-end;
+
+    overflow-x: auto;
+    overflow-y: visible;
+
+    padding:
+        12px
+        8px
+        8px;
+}
+
+/* =========================================================
+   MAIN COMPACTE STYLE PLATO
+   ========================================================= */
+
+.president-local-hand .hand {
+    width: max-content;
+    max-width: 760px;
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+
+    overflow: visible;
+
+    padding: 8px 20px;
+}
+
+
+/* cartes de la main */
+
+.president-local-hand .playing-card {
+    width: 62px;
+    height: 90px;
+
+    margin-left: -30px;
+
+    flex: 0 0 62px;
+
+    transition:
+        transform .18s ease,
+        border-color .18s ease;
+}
+
+
+/* première carte entièrement visible */
+
+.president-local-hand .playing-card:first-child {
+    margin-left: 0;
+}
+
+
+/* carte sélectionnée */
+
+.president-local-hand .playing-card.selected {
+    transform: translateY(-14px);
+}
+
+
+/* rang et symbole adaptés à la nouvelle taille */
+
+.president-local-hand .card-rank {
+    left: 7px;
+    top: 5px;
+
+    font-size: 16px;
+}
+
+.president-local-hand .card-suit {
+    font-size: 25px;
+}
+
+
+/* =========================================================
+   ORGANISATION BAS DE TABLE
+   ========================================================= */
+
+/* Main compacte au-dessus du joueur local */
+.president-local-hand {
+    bottom: 115px;
+}
+
+
+/* Boutons juste sous les cartes */
+.president-hand-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 4px;
+}
+
+
+/* Joueur local tout en bas */
+.president-table-player.is-me {
+    top: auto !important;
+    bottom: 8px !important;
+
+    transform: translateX(-50%) !important;
+}
+
+
+/* Le centre reste réellement au centre */
+.president-table-center {
+    top: 43%;
+}
+/* =========================================================
+   BOUTONS SOUS LES CARTES
+   ========================================================= */
+
+.president-hand-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+
+    margin: 0;
+}
+
+
+.president-hand-actions .game-action {
+    min-width: 105px;
+}
+
+
+/* =========================================================
+   QUITTER
+   Position provisoire
+   ========================================================= */
+
+.president-leave-button {
+    position: absolute;
+
+    top: 14px;
+    right: 14px;
+
+    z-index: 30;
+}
+
+
+/* =========================================================
+   AUDIO / MICROPHONE
+   ========================================================= */
+
+.president-audio-button {
+    width: 25px;
+    height: 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 3px auto 0;
+
+    padding: 0;
+
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 50%;
+
+    background: rgba(3,10,24,.82);
+
+    color: #ffffff;
+
+    font-size: 12px;
+
+    cursor: pointer;
+
+    transition:
+        transform .15s ease,
+        background .15s ease,
+        border-color .15s ease;
+}
+
+
+.president-audio-button:hover {
+    transform: scale(1.08);
+
+    border-color:
+        rgba(96,165,250,.65);
+
+    background:
+        rgba(30,64,175,.30);
+}
+
+
+.president-audio-button.is-muted {
+    opacity: .55;
+
+    border-color:
+        rgba(239,68,68,.45);
+
+    background:
+        rgba(127,29,29,.20);
+}
+
+
+.president-mic-button:not(.is-muted) {
+    border-color:
+        rgba(34,197,94,.45);
+
+    box-shadow:
+        0 0 8px
+        rgba(34,197,94,.15);
+}

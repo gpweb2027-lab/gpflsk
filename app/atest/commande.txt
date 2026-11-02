@@ -1,0 +1,261 @@
+from app.models import FriendRequest, User
+
+for demande in FriendRequest.query.all():
+    expediteur = User.query.get(demande.sender_id)
+    destinataire = User.query.get(demande.receiver_id)
+
+    print(
+        expediteur.username,
+        "→",
+        destinataire.username,
+        ":",
+        demande.status
+    )
+flask shell
+[(User.query.get(d.sender_id).username, "→", User.query.get(d.receiver_id).username, d.status) for d in FriendRequest.query.all()]
+
+pour creer la table model.py
+from app.extensions import db
+from app.models import PrivateMessage
+PrivateMessage.__table__.create(bind=db.engine, checkfirst=True)
+
+
+from sqlalchemy import inspect
+"private_messages" in inspect(db.engine).get_table_names()
+
+
+
+(.venv) PS C:\python\Projets\Mygames> & "C:\Program Files (x86)\cloudflared\cloudflared.exe" tunnel --url http://127.0.0.1:5000
+
+
+Attention : cette implémentation suit les connexions en mémoire Python. Elle est adaptée à un serveur Flask avec un seul processus ; si tu utilises plusieurs processus, il faudra centraliser les présences et les parties dans un stockage partagé. comment je sais sur combien processus je suis et combien processus j'ai
+Comme tu utilises Windows avec PyCharm pour ton serveur Flask, tu peux vérifier très facilement combien de processus Python font tourner ton jeu Président.
+
+Il faut distinguer deux choses :
+
+Processus : une instance du serveur Python.
+
+Connexions : les joueurs et spectateurs connectés à ton jeu.
+
+Tu peux avoir 30 joueurs connectés sur un seul processus Python.
+
+1. Vérifier les processus sur Windows
+Ouvre PowerShell et exécute :
+
+Get-CimInstance Win32_Process |
+Where-Object { $_.Name -match "python|gunicorn|waitress" } |
+Select-Object ProcessId, ParentProcessId, Name, CommandLine
+
+Tu obtiendras quelque chose comme :
+
+ProcessId  ParentProcessId  Name        CommandLine
+--------- ---------------  ----------  ---------------------
+1234      800              python.exe  python app.py
+5678      1234             python.exe  python app.py
+Dans cet exemple, il y a deux processus Python, mais cela ne signifie pas nécessairement qu'ils traitent tous les deux les connexions des joueurs.
+
+Il faut regarder leur commande et leur rôle.
+
+2. Vérifier comment Flask démarre
+Regarde la configuration Run / Debug dans PyCharm, ou le terminal dans lequel tu démarres le serveur.
+
+Démarrage
+
+Situation habituelle
+
+python app.py
+
+Généralement un processus serveur
+
+flask run --no-reload
+
+Généralement un processus serveur
+
+flask run --debug
+
+Peut créer deux processus à cause du rechargement automatique
+
+waitress-serve ...
+
+Généralement un processus avec plusieurs threads
+
+gunicorn -w 4 ...
+
+Quatre processus workers, plus un processus maître
+
+Le cas de Flask en mode debug est important : voir deux processus Python ne signifie pas forcément que tu as deux serveurs actifs.
+
+3. Vérifier le processus qui utilise le port de ton jeu
+Si ton serveur Flask utilise le port 5000, exécute :
+
+Get-NetTCPConnection -LocalPort 5000 -State Listen |
+Select-Object LocalAddress, LocalPort, OwningProcess
+
+Puis, pour identifier le programme :
+
+Get-CimInstance Win32_Process -Filter "ProcessId = 1234" |
+Select-Object ProcessId, Name, CommandLine
+
+Remplace 1234 par le numéro obtenu dans la première commande.
+
+Si tu utilises le port 8000 ou un autre port, remplace 5000.
+
+4. Et ton tunnel Cloudflare ?
+Le processus cloudflared.exe est distinct de Flask.
+
+Par exemple :
+
+Joueurs et spectateurs
+
+Cloudflare Tunnel
+
+cloudflared.exe
+
+Serveur Flask
+
+python.exe — 1 processus serveur, par exemple
+
+Le tunnel Cloudflare ne compte pas comme un processus Flask supplémentaire.
+
+5. Ce que cela change pour ton jeu Président
+Si ton application utilise un seul processus serveur Flask, le stockage en mémoire des parties et des présences peut fonctionner dans cette configuration.
+
+Si elle utilise plusieurs processus serveurs, tu risques notamment d'avoir un joueur considéré connecté dans un processus et absent dans un autre, ou une partie disponible dans un processus mais introuvable dans un autre.
+
+À terme, Redis serait une solution adaptée pour partager les présences entre processus, mais il faudrait également traiter le stockage de l'état des parties.
+
+Pour commencer, copie-colle ici le résultat de la première commande PowerShell. Je pourrai te dire quels processus correspondent à Flask, à PyCharm ou à d'autres programmes, et si ta configuration actuelle présente un risque pour le mode spectateur et les points verts/noirs.
+
+dans bash: flask routes
+
+print(app.url_map)
+
+
+(.venv) PS C:\python\Projets\Mygames> Get-Process -Id 5100 -ErrorAction SilentlyContinue
+
+Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
+-------  ------    -----      -----     ------     --  -- -----------
+    366      42   372456      44340     161,98   5100   1 python
+
+
+(.venv) PS C:\python\Projets\Mygames> Stop-Process -Id 5100
+(.venv) PS C:\python\Projets\Mygames>
+
+erreur s'est produit et comment l'eviter à l'avenir
+Excellente nouvelle ! 👑 Maintenant que les messages apparaissent correctement, nous savons ce qui s'est passé.
+
+Et c'est une erreur assez classique avec Flask, particulièrement lorsqu'on développe avec PyCharm sous Windows.
+
+1. Pourquoi cette erreur s'est produite
+Le problème venait très probablement d'un ancien processus Flask qui continuait à fonctionner en arrière-plan.
+
+Voici ce qui s'est passé :
+
+1. Ancien serveur Flask
+
+run.py démarre sur le port 5000, avec les anciennes routes API.
+
+2. Modification du code
+
+Nous ajoutons /api/users/messages/recent dans app/users/routes.py.
+
+3. Deux versions différentes
+
+flask routes voit le code récent, mais le serveur déjà démarré utilise encore l'ancienne version chargée en mémoire.
+
+4. Erreur HTTP 404
+
+Le navigateur appelle la nouvelle route, mais l'ancien serveur ne la connaît pas.
+
+Redémarrage complet → API fonctionnelle
+
+La confirmation la plus forte, c'est que nous n'avons pas eu besoin de modifier le code pour résoudre l'erreur. Il a suffi de redémarrer le bon processus.
+
+2. Comment éviter ce problème à l'avenir
+Je te recommande de prendre ces quatre habitudes.
+
+1. Redémarrer Flask après toute modification Python
+
+Quand nous modifions routes.py, models.py, __init__.py ou un autre fichier backend, arrête complètement le serveur avant de le relancer.
+
+Le rechargement automatique de Flask est pratique, mais il ne faut pas toujours compter dessus.
+
+2. Vérifier qu'un seul serveur utilise le port 5000
+
+Dans PowerShell :
+
+Get-NetTCPConnection -LocalPort 5000 -State Listen -ErrorAction SilentlyContinue |
+    Select-Object LocalAddress, LocalPort, OwningProcess
+
+Tu dois normalement voir un seul processus à l'écoute sur ce port.
+
+3. Vérifier l'identité du processus
+
+Si tu as un doute :
+
+Get-CimInstance Win32_Process -Filter "ProcessId = 5100" |
+    Select-Object ProcessId, Name, CommandLine
+
+Remplace 5100 par le PID affiché par la commande précédente.
+
+Cela permet de vérifier quel fichier Python est réellement exécuté.
+
+4. Distinguer les modifications frontend et backend
+
+Modification
+
+Action recommandée
+
+HTML
+
+Actualiser avec Ctrl + F5
+
+CSS
+
+Actualiser avec Ctrl + F5
+
+JavaScript
+
+Actualiser avec Ctrl + F5
+
+Routes Python
+
+Redémarrer Flask
+
+Modèles SQLAlchemy
+
+Redémarrer Flask et vérifier si une migration est nécessaire
+
+Configuration Flask
+
+Redémarrer Flask
+
+3. Une commande de diagnostic à conserver
+Lorsque tu rencontres une nouvelle erreur 404 sur une API que tu viens d'ajouter, commence par :
+
+netstat -ano | findstr LISTENING | findstr :5000
+
+Cela permet de voir immédiatement quel processus occupe le port.
+
+Attention : ne termine pas systématiquement ce processus. Vérifie d'abord qu'il s'agit bien de ton application.
+
+Ce que je te recommande pour Game Platform
+À partir de maintenant, nous pouvons adopter une règle simple :
+
+Chaque fois que nous installons un correctif Python, nous redémarrons Flask complètement avant de tester le navigateur.
+
+Et surtout, si une nouvelle API renvoie 404, nous vérifions d'abord le serveur actif avant de modifier le code.
+
+Cela nous évitera de perdre du temps sur de fausses erreurs et réduira les risques de régression dans les parties Président, le chat et le vocal.
+
+Nous pouvons maintenant considérer le problème des conversations récentes comme résolu et reprendre tranquillement le développement du lobby.
+
+
+python installer_noto.py "C:\chemin\noto-emoji-main" "C:\chemin\GamePlatform"
+
+telecharger les emoj
+
+
+gpweb2027-lab
+
+https://github.com/gpweb2027-lab/gpflsk.git

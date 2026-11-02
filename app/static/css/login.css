@@ -1,0 +1,12 @@
+/* Connexion : carte sombre assortie à l'inscription. */
+.login-shell{min-height:100vh;display:grid;place-items:center;padding:36px 16px;background:#070d1c;color:#f8fafc;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.login-panel{box-sizing:border-box;width:100%;max-width:470px;padding:38px 35px;background:linear-gradient(155deg,#101e37,#0b162b);border:1px solid #243754;border-radius:21px;box-shadow:0 24px 65px #0005}
+.login-brand{display:flex;align-items:center;gap:12px;font-size:17px;font-weight:800}.login-brand-icon{display:grid;place-items:center;width:45px;height:45px;border-radius:13px;background:#302779;color:#c4b5fd;font-size:27px}
+.login-intro{text-align:center;margin:27px 0 30px}.login-intro h1{font-size:27px;line-height:1.2;margin:0 0 10px}.login-intro p{margin:0;color:#96a9c9;font-size:13px}
+.login-form{display:flex;flex-direction:column;gap:10px}.login-form>label:not(.remember-row){font-size:12px;font-weight:700;margin-top:9px}
+.input-wrap{display:flex;align-items:center;min-height:48px;border:1px solid #2b4265;border-radius:10px;background:#0b1931;transition:border-color .15s}.input-wrap:focus-within{border-color:#7c5cff;box-shadow:0 0 0 3px #7c5cff25}.field-icon{padding-left:15px;color:#91a6c6;font-size:17px}
+.input-wrap input{flex:1;min-width:0;padding:13px 12px;border:0;outline:0;background:transparent;color:#fff;font-size:14px}.input-wrap input::placeholder{color:#7187a9}.password-toggle{display:grid;place-items:center;width:45px;align-self:stretch;border:0;background:transparent;color:#91a6c6;cursor:pointer}.password-toggle:hover{color:#fff}
+.remember-row{display:flex;align-items:center;gap:10px;margin:10px 0 5px;color:#b5c4dc;font-size:13px;cursor:pointer}.remember-row input{width:16px;height:16px;accent-color:#7154ff}
+.login-submit{min-height:49px;margin-top:6px;border:0;border-radius:10px;background:linear-gradient(100deg,#9136f5,#365efa);color:white;font-weight:800;cursor:pointer}.login-submit:hover{filter:brightness(1.1)}.login-submit:disabled{opacity:.65;cursor:wait}
+.login-feedback{margin:6px 0 0;color:#fca5a5;font-size:13px}.login-register{margin:29px 0 0;text-align:center;color:#8fa4c4;font-size:13px}.login-register a{color:#a998ff;text-decoration:none;font-weight:700}.login-register a:hover{text-decoration:underline}
+@media(max-width:480px){.login-shell{padding:18px 12px}.login-panel{padding:28px 22px}.login-intro h1{font-size:24px}}

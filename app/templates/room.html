@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+
+{% block title %}
+Salle {{ code }} — Game Platform
+{% endblock %}
+
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/chat-common.css') }}">
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/room.css') }}"
+>
+
+{% if game_type == "PRESIDENT" %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for(
+        'static',
+        filename='css/games/president.css'
+    ) }}"
+>
+
+{% endif %}
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="room-page">
+
+    <div class="room-container">
+
+        <header class="room-header">
+
+            <div class="room-header-left">
+
+                <a
+                    href="{{ url_for('game_lobby_page', slug='president') }}"
+                    class="room-back">
+                    ←
+                </a>
+
+                <div class="room-title-block">
+
+                    <span class="game-badge">
+                        👑 PRESIDENT
+                    </span>
+
+                    <h1 id="room-title">
+                        Salle {{ code }}
+                    </h1>
+
+                    <p id="room-info">
+                        Chargement du salon...
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="room-code">
+                Code :
+                <strong>{{ code }}</strong>
+            </div>
+
+        </header>
+
+
+        <div class="room-grid">
+
+            <main class="room-main">
+
+
+                <!-- SALLE D'ATTENTE -->
+
+                <section
+                    id="waiting-panel"
+                    class="room-card waiting-panel">
+
+                    <div class="waiting-icon">
+                        👑
+                    </div>
+
+                    <h2>
+                        En attente des joueurs
+                    </h2>
+
+                    <p class="waiting-subtitle">
+                        Invite un ami à rejoindre
+                        la salle {{ code }}
+                    </p>
+                    <div
+                        id="room-expiration"
+                        class="room-expiration"
+                    >
+                        <div class="room-expiration-info">
+
+                            <span>
+                                ⏱ Cette salle expire dans
+                            </span>
+
+                            <strong id="room-time-left">
+                                --
+                            </strong>
+
+                        </div>
+
+                        <div class="room-timeout-track">
+
+                            <div
+                                id="room-timeout-progress"
+                                class="room-timeout-progress"
+                            ></div>
+
+                        </div>
+                    </div>
+
+
+                    <div
+                        id="members"
+                        class="members-list">
+                    </div>
+
+
+                    <button
+                        id="start-btn"
+                        class="start-button"
+                        type="button"
+                        disabled>
+
+                        Démarrer la partie
+
+                    </button>
+
+
+                    <p class="waiting-help">
+                        Il faut au moins 2 joueurs
+                        pour commencer.
+                    </p>
+
+                </section>
+                 <!-- JEU -->
+                {% include "games/president.html" %}
+
+            </main>
+
+
+            <!-- CHAT -->
+
+            <aside class="room-sidebar">
+
+                <section
+                    id="chat-panel"
+                    class="room-card room-chat">
+
+                    <div class="chat-header">
+
+                        <h3>
+                            💬 Chat de la salle
+                        </h3>
+
+                    </div>
+
+
+                    <div
+                        id="chat-messages"
+                        class="chat-messages">
+
+                        <div class="chat-empty">
+                            Aucun message pour le moment.
+                        </div>
+
+                    </div>
+
+
+                    <form
+                        id="chat-form"
+                        class="chat-form">
+
+                        <button
+                            id="chat-emoji-btn"
+                            class="chat-emoji-btn"
+                            type="button"
+                            aria-label="Choisir un emoji"
+                            title="Ajouter un emoji">
+                            😊
+                        </button>
+
+                        <input
+                            id="chat-input"
+                            type="text"
+                            maxlength="500"
+                            placeholder="Écrire un message..."
+                            autocomplete="off"
+                        >
+                        <button
+                            id="chat-send-btn"
+                            class="chat-send"
+                            type="submit"
+                            aria-label="Envoyer le message"
+                            title="Envoyer">
+                            ➤
+                        </button>
+                    </form>
+
+                </section>
+
+                <section id="spectators-panel" class="room-card room-spectators" aria-label="Spectateurs">
+                    <h3>👁 Spectateurs <span id="spectators-count">0</span></h3>
+                    <button id="spectator-microphone" type="button" hidden aria-label="Activer mon microphone">🎙️ Activer mon micro</button>
+                    <div id="spectators-list" class="spectators-list">
+                        <p class="spectators-empty">Aucun spectateur pour le moment.</p>
+                    </div>
+                </section>
+
+            </aside>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- FENÊTRE PROFIL JOUEUR -->
+<div id="player-profile-modal"
+     class="player-profile-overlay"
+     hidden>
+
+    <div class="player-profile-card"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="player-profile-name">
+
+        <button id="player-profile-close"
+                class="player-profile-close"
+                type="button"
+                aria-label="Fermer">
+            ×
+        </button>
+
+        <div id="player-profile-avatar"
+             class="player-profile-avatar"></div>
+
+        <h2 id="player-profile-name">Joueur</h2>
+
+        <p class="player-profile-subtitle">Profil du joueur</p>
+
+        <button
+            id="player-profile-add-friend"
+            class="player-profile-add-friend"
+            type="button"
+            hidden
+        >
+            <span>🤝</span>
+            Ajouter en ami
+        </button>
+
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/chat-common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+
+
+
+<script
+    src="https://cdn.socket.io/4.8.1/socket.io.min.js">
+</script>
+
+<script
+    src="{{ url_for('static', filename='js/socket.js') }}">
+</script>
+
+
+<script>
+    requireAuth();
+
+    const roomCode = {{ code|tojson }};
+    const gameType = {{ game_type|tojson }};
+</script>
+
+
+<script
+    src="{{ url_for('static', filename='js/room.js') }}">
+</script>
+
+{% if game_type == "PRESIDENT" %}
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/games/president.js'
+    ) }}">
+</script>
+
+{% endif %}
+
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+            console.log(
+                "Initialisation salle:",
+                roomCode
+            );
+
+        initRoom();
+
+        let gameStateRenderer = null;
+
+
+        if (gameType === "PRESIDENT") {
+
+            initPresidentGame();
+
+            gameStateRenderer = renderPresidentState;
+
+        }
+
+
+        window.gameSocket =
+            connectGameSocket(
+                roomCode,
+                gameStateRenderer,
+                renderRoomUpdate,
+                renderChatMessage,
+                renderChatHistory
+            );
+
+        window.gameSocket?.on("chat:changed", data => window.ChatCommon?.refreshOne("room", data.message_id));
+         console.log(
+                "Socket créé:",
+                window.gameSocket
+            );
+
+    }
+);
+
+</script>
+
+{% endblock %}

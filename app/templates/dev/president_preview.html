@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>DEV - Président</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/dev/president_preview.css'
+        ) }}"
+    >
+</head>
+
+<body>
+
+<div class="dev-page">
+
+    <!-- PANNEAU DE CONTRÔLE -->
+
+    <aside class="dev-controls">
+
+        <h1>
+            👑 Simulateur Président
+        </h1>
+
+        <p class="dev-description">
+            Prévisualisation uniquement.
+            Aucun compte ni aucune salle réelle.
+        </p>
+
+
+        <div class="control-group">
+
+            <label>
+                Nombre de joueurs
+            </label>
+
+            <div
+                id="player-count-buttons"
+                class="player-count-buttons"
+            ></div>
+
+        </div>
+
+
+        <div class="control-group">
+
+            <label for="turn-player">
+                Tour de
+            </label>
+
+            <select id="turn-player"></select>
+
+        </div>
+
+
+        <div class="control-group">
+
+            <label for="owner-player">
+                Propriétaire
+            </label>
+
+            <select id="owner-player"></select>
+
+        </div>
+
+
+        <div class="control-group">
+
+            <label>
+                Temps du tour
+            </label>
+
+            <input
+                id="timer-range"
+                type="range"
+                min="0"
+                max="15"
+                value="11"
+            >
+
+            <strong id="timer-value">
+                11s
+            </strong>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ZONE DE TEST -->
+
+    <main class="preview-area">
+
+        <div
+            id="preview-table"
+            class="preview-table"
+        >
+
+            <div
+                id="preview-players"
+                class="preview-players"
+            ></div>
+
+
+            <div class="table-center">
+
+    <!-- Indication du sens de jeu -->
+    <div class="turn-direction">
+
+        <span class="direction-arrow arrow-top">
+            ➜
+        </span>
+
+        <span class="direction-arrow arrow-right">
+            ➜
+        </span>
+
+        <span class="direction-arrow arrow-bottom">
+            ➜
+        </span>
+
+        <span class="direction-arrow arrow-left">
+            ➜
+        </span>
+
+    </div>
+
+
+    <!-- Zone où apparaissent les cartes jouées -->
+    <div class="center-play-zone">
+
+        <div class="center-card">
+            <img
+                src="/static/images/cards/carte_01/8_diamonds.svg"
+                alt="8 de carreau"
+            >
+        </div>
+
+    </div>
+
+</div>
+
+
+            <!-- FAUSSE MAIN -->
+
+            <div class="preview-hand">
+
+                <div class="hand-cards">
+
+                    <img
+                        class="preview-card-image"
+                        src="/static/images/cards/carte_01/8_clubs.svg"
+                        alt="8 de trèfle"
+                    >
+
+                    <img
+                        class="preview-card-image"
+                        src="/static/images/cards/carte_01/9_diamonds.svg"
+                        alt="9 de carreau"
+                    >
+
+                    <img
+                        class="preview-card-image"
+                        src="/static/images/cards/carte_01/9_spades.svg"
+                        alt="9 de pique"
+                    >
+
+                    <img
+                        class="preview-card-image"
+                        src="/static/images/cards/carte_01/10_hearts.svg"
+                        alt="10 de cœur"
+                    >
+
+                    <img
+                        class="preview-card-image"
+                        src="/static/images/cards/carte_01/j_clubs.svg"
+                        alt="Valet de trèfle"
+                    >
+
+                    <img
+                        class="preview-card-image"
+                        src="/static/images/cards/carte_01/q_diamonds.svg"
+                        alt="Dame de carreau"
+                    >
+
+                    <img
+                        class="preview-card-image"
+                        src="/static/images/cards/carte_01/k_spades.svg"
+                        alt="Roi de pique"
+                    >
+
+                    <img
+                        class="preview-card-image"
+                        src="/static/images/cards/carte_01/a_hearts.svg"
+                        alt="As de cœur"
+                    >
+
+                    <img
+                        class="preview-card-image"
+                        src="/static/images/cards/carte_01/2_clubs.svg"
+                        alt="2 de trèfle"
+                    >
+
+                </div>
+
+                <div class="preview-actions">
+
+                    <button>
+                        Jouer
+                    </button>
+
+                    <button>
+                        Passer
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/dev/president_preview.js'
+    ) }}"
+></script>
+
+</body>
+</html>

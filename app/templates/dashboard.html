@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Game Platform</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+<style>
+.logo { width: auto; }
+@media (max-width: 1350px) {
+    .app-layout { grid-template-columns: minmax(0, 1fr) 270px; }
+}
+@media (max-width: 1050px) {
+    .app-layout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+    .app-layout { display: block; }
+}
+</style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chat-common.css') }}">
+</head>
+
+<body>
+
+<header class="topbar lobby-topbar">
+    <a class="logo lobby-brand" href="/lobby" aria-label="Game Platform, accueil">Game Platform</a>
+    <span id="messages-unread-count" hidden style="display:none !important"></span>
+    <div class="top-actions lobby-header-actions">
+        <div class="profile-mini lobby-profile-mini">
+            <button type="button" class="avatar" id="header-avatar-btn"
+                    aria-label="Modifier ma photo de profil"
+                    title="Modifier ma photo de profil">👨🏻</button>
+            <span class="lobby-online-dot" role="img" aria-label="En ligne" title="En ligne"></span>
+            <strong id="current-username" hidden>Joueur</strong>
+        </div>
+    </div>
+</header>
+
+
+<div class="app-layout">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar activity-sidebar" aria-label="Activité récente">
+        <div id="activity-inbox" class="activity-inbox" aria-live="polite"></div>
+    </aside>
+
+    <!-- CONTENU CENTRAL -->
+
+    <main class="main-content">
+
+        <!-- HERO -->
+
+        <section class="hero">
+
+            <div class="hero-content">
+
+                <h1>
+                    Joue, discute<br>
+                    et <span>apprends ensemble.</span>
+                </h1>
+
+                <p>
+                    Des jeux multijoueurs et un espace
+                    d'échange linguistique pour rencontrer
+                    des gens du monde entier.
+                </p>
+
+            </div>
+
+
+            <div class="hero-art">
+
+                <div class="planet">🌍</div>
+
+                <div class="bubble bubble-one">
+                    En Hello!
+                </div>
+
+                <div class="bubble bubble-two">
+                    🇫🇷 Bonjour!
+                </div>
+
+                <div class="bubble bubble-three">
+                    🇪🇸 ¡Hola!
+                </div>
+
+                <div class="bubble bubble-four">
+                    🇩🇪 Hallo!
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- JEUX -->
+
+        <div class="section-title">
+
+            <h2>Jeux disponibles</h2>
+
+            <div class="carousel-controls" aria-label="Navigation des jeux">
+                <button type="button" class="carousel-arrow" data-scroll-target="games-carousel" data-scroll-direction="-1" aria-label="Jeux précédents">←</button>
+                <button type="button" class="carousel-arrow" data-scroll-target="games-carousel" data-scroll-direction="1" aria-label="Jeux suivants">→</button>
+        </div>
+
+  </div>
+
+
+    <section id="games-carousel" class="games-grid horizontal-carousel" aria-label="Liste des jeux" tabindex="0">
+
+                    {% for game in games %}
+
+                    <article class="game-card">
+
+                        <div class="game-image game-{{ loop.index }}">
+                            <span>{{ game.emoji }}</span>
+                        </div>
+
+                        <div class="game-body">
+
+                            <h3>{{ game.name }}</h3>
+
+                            <p>{{ game.description }}</p>
+
+                            <span class="players">
+                                👥 {{ game.players }}
+                            </span>
+
+                            {% if game.name == "President" %}
+
+
+                                    <a
+                                        class="play-button"
+                                        href="/games/president">
+                                         Jouer maintenant →
+                                    </a>
+
+                            {% elif game.name == "UNO" %}
+
+                                <a
+                                    class="play-button"
+                                    href="/games/uno">
+                                     Jouer maintenant →
+                                </a>
+
+                            {% else %}
+
+                                <button
+                                    class="play-button disabled"
+                                    type="button"
+                                    disabled>
+                                    🔒 Bientôt disponible
+                                </button>
+
+                            {% endif %}
+
+                        </div>
+
+                    </article>
+
+                    {% endfor %}
+        </section>
+
+
+        <!-- LANGUES -->
+
+        <div class="section-title language-title">
+
+            <h2>Apprendre des langues</h2>
+
+             <div class="carousel-controls" aria-label="Navigation des langues">
+                <button type="button" class="carousel-arrow" data-scroll-target="languages-carousel" data-scroll-direction="-1" aria-label="Langues précédentes">←</button>
+                <button type="button" class="carousel-arrow" data-scroll-target="languages-carousel" data-scroll-direction="1" aria-label="Langues suivantes">→</button>
+            </div>
+
+        </div>
+
+
+        <section class="language-section">
+              <div id="languages-carousel" class="language-grid horizontal-carousel" aria-label="Liste des langues" tabindex="0">
+
+                {% for language in languages %}
+
+                <article class="language-card">
+
+                    <div class="flag">
+                        {{ language.flag }}
+                    </div>
+
+                    <strong>
+                        {{ language.name }}
+                    </strong>
+
+                    <div class="progress">
+                        <span style="width: {{ 35 + loop.index * 10 }}%"></span>
+                    </div>
+
+                    <small>
+                        {{ 1200 + loop.index * 370 }}
+                        apprenants
+                    </small>
+
+                </article>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+
+        <!-- BAS DASHBOARD -->
+
+        <section class="bottom-dashboard">
+
+
+
+        </section>
+
+    </main>
+
+
+    <!-- COLONNE DROITE -->
+
+    <aside class="rightbar lobby-social-column" aria-label="Espace social">
+        <section class="panel social-panel social-friends-panel" aria-labelledby="social-friends-title">
+            <div class="panel-title"><h3 id="social-friends-title">Mes amis (<span id="friends-count">0</span>)</h3></div>
+            <div id="dashboard-friends-list" class="social-panel-scroll" aria-live="polite"><p>Chargement des amis...</p></div>
+        </section>
+        <section class="panel social-panel social-requests-panel" aria-labelledby="social-requests-title">
+            <div class="panel-title"><h3 id="social-requests-title">Demandes d'amis (<span id="social-requests-count">0</span>)</h3></div>
+            <div id="social-friend-requests-list" class="social-panel-scroll" aria-live="polite"><p>Chargement des demandes...</p></div>
+        </section>
+        <section class="panel social-panel social-groups-panel" aria-labelledby="social-groups-title">
+            <div class="panel-title"><h3 id="social-groups-title">Groupes d'amis (<span id="groups-count">0</span>)</h3><button id="group-create-open" class="group-plus" type="button" title="Créer un groupe" aria-label="Créer un groupe">+</button></div>
+            <div id="groups-sidebar-list" class="social-panel-scroll"><p>Chargement des groupes...</p></div>
+        </section>
+    </aside>
+</div>
+<!-- GROUPES D'AMIS -->
+<div id="group-create-modal" class="group-overlay" hidden><div class="group-dialog" role="dialog" aria-modal="true" aria-labelledby="group-create-title">
+  <div class="group-dialog-head"><h2 id="group-create-title">Créer un groupe</h2><button type="button" data-close-group="group-create-modal" aria-label="Fermer">×</button></div>
+  <form id="group-create-form"><label for="group-name">Nom du groupe</label><input id="group-name" maxlength="80" minlength="2" required placeholder="Ex. Les stratèges">
+  <p>Choisis les amis à ajouter :</p><div id="group-friend-picker" class="group-friend-picker"></div>
+  <button type="submit" class="group-primary">Créer le groupe</button></form>
+</div></div>
+<div id="group-chat-modal" class="group-overlay" hidden><div class="group-dialog group-chat-dialog" role="dialog" aria-modal="true" aria-labelledby="group-chat-title">
+  <div class="group-dialog-head"><div><h2 id="group-chat-title">Groupe</h2><small id="group-chat-members"></small></div><button type="button" data-close-group="group-chat-modal" aria-label="Fermer">×</button></div>
+  <div class="group-chat-actions"><button type="button" id="group-add-friend">+ Ajouter un ami</button><button type="button" id="group-leave">Quitter le groupe</button><button type="button" id="group-delete" hidden>Supprimer le groupe</button></div>
+  <div id="group-chat-messages" class="group-chat-messages" aria-live="polite"></div>
+  <form id="group-chat-form" class="group-chat-form"><input id="group-chat-input" maxlength="2000" placeholder="Écrire au groupe..." required autocomplete="off"><button type="submit">Envoyer</button></form>
+</div></div>
+<div id="group-add-modal" class="group-overlay" hidden><div class="group-dialog" role="dialog" aria-modal="true" aria-labelledby="group-add-title">
+  <div class="group-dialog-head"><h2 id="group-add-title">Ajouter un ami</h2><button type="button" data-close-group="group-add-modal" aria-label="Fermer">×</button></div>
+  <div id="group-add-picker" class="group-friend-picker"></div>
+</div></div>
+<!-- MESSAGERIE PRIVÉE -->
+<div id="private-chat-modal" class="private-chat-modal" hidden>
+    <div class="private-chat-box"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="private-chat-title">
+
+        <div class="private-chat-header">
+            <h2 id="private-chat-title">💬 Conversation</h2>
+
+            <button type="button"
+                    id="private-chat-close"
+                    aria-label="Fermer la conversation">×</button>
+        </div>
+
+        <div id="private-chat-messages" class="private-chat-messages">
+            <p>Sélectionne un ami pour discuter.</p>
+        </div>
+
+        <form id="private-chat-form" class="private-chat-form">
+            <input type="text"
+                   id="private-chat-input"
+                   placeholder="Écrire un message..."
+                   maxlength="2000"
+                   autocomplete="off"
+                   required>
+
+            <button type="submit">Envoyer</button>
+        </form>
+
+    </div>
+</div>
+<div id="toast" class="toast hidden"></div>
+
+<!-- FENÊTRE AMIS -->
+<div id="friends-modal" class="friends-modal" hidden>
+    <div class="friends-modal-box"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="friends-modal-title">
+
+        <button
+            type="button"
+            id="friends-modal-close"
+            class="friends-modal-close"
+            aria-label="Fermer"
+        >×</button>
+
+        <h2 id="friends-modal-title">👥 Mes amis</h2>
+
+        <h3>Demandes d'amis reçues</h3>
+
+        <div id="friend-requests-list">
+            <p>Chargement des demandes...</p>
+        </div>
+
+        <h3 style="margin-top: 25px;">Mes amis</h3>
+
+        <div id="accepted-friends-list">
+            <p>Chargement des amis...</p>
+        </div>
+
+    </div>
+</div>
+
+<div id="avatar-modal" class="avatar-modal" hidden>
+    <div class="avatar-modal-box" role="dialog"
+         aria-modal="true" aria-labelledby="avatar-modal-title">
+
+        <button type="button" id="avatar-modal-close"
+                class="avatar-modal-close" aria-label="Fermer">×</button>
+
+        <h2 id="avatar-modal-title">Ma photo de profil</h2>
+        <p>Personnalise ton avatar visible dans les parties et le chat.</p>
+
+        <div id="avatar-modal-preview" class="avatar-modal-preview">👨🏻</div>
+
+        <input type="file" id="avatar-modal-input"
+               accept="image/jpeg,image/png,image/webp" hidden>
+
+        <button type="button" id="avatar-modal-choose"
+                class="avatar-modal-choose">
+            📷 Choisir une photo
+        </button>
+
+        <button type="button" id="avatar-modal-save"
+                class="avatar-modal-save" disabled>
+            Enregistrer
+        </button>
+
+        <p id="avatar-modal-status" role="status"></p>
+    </div>
+</div>
+
+<script>
+// Navigation horizontale indépendante des jeux et des langues.
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".carousel-arrow[data-scroll-target]").forEach(button => {
+        const track = document.getElementById(button.dataset.scrollTarget);
+        if (!track) return;
+        const update = () => {
+            const max = Math.max(0, track.scrollWidth - track.clientWidth);
+            const position = track.scrollLeft;
+            const direction = Number(button.dataset.scrollDirection);
+            button.disabled = direction < 0 ? position <= 2 : position >= max - 2;
+        };
+        button.addEventListener("click", () => {
+            const card = track.querySelector(":scope > *");
+            const gap = parseFloat(getComputedStyle(track).columnGap) || 14;
+            const distance = card ? card.getBoundingClientRect().width + gap : track.clientWidth * 0.8;
+            track.scrollBy({left: Number(button.dataset.scrollDirection) * distance, behavior: "smooth"});
+        });
+        track.addEventListener("scroll", update, {passive:true});
+        window.addEventListener("resize", update);
+        requestAnimationFrame(update);
+    });
+});
+</script>
+
+<!-- Bibliothèque Socket.IO -->
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<script
+    src="{{ url_for('static', filename='js/app.js') }}">
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const token =
+        localStorage.getItem("access_token");
+
+    const userData =
+        localStorage.getItem("user");
+
+
+    if (!token || !userData) {
+        location.href = "/login";
+        return;
+    }
+
+
+    try {
+
+        const user = JSON.parse(userData);
+
+        const username =
+            document.getElementById(
+                "current-username"
+            );
+
+        if (username && user.username) {
+            username.textContent =
+                user.username;
+        }
+
+    } catch (error) {
+
+        localStorage.removeItem(
+            "access_token"
+        );
+
+        localStorage.removeItem(
+            "user"
+        );
+
+        location.href = "/login";
+    }
+
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const button = document.getElementById("header-avatar-btn");
+    const modal = document.getElementById("avatar-modal");
+    const close = document.getElementById("avatar-modal-close");
+    const choose = document.getElementById("avatar-modal-choose");
+    const input = document.getElementById("avatar-modal-input");
+    const preview = document.getElementById("avatar-modal-preview");
+    const save = document.getElementById("avatar-modal-save");
+    const status = document.getElementById("avatar-modal-status");
+
+    let selectedFile = null;
+    let previewUrl = null;
+
+    function displayAvatar(element, url) {
+        element.replaceChildren();
+
+        if (!url) {
+            element.textContent = "👨🏻";
+            return;
+        }
+
+        const img = document.createElement("img");
+        img.alt = "Avatar";
+        img.onerror = () => {
+            element.textContent = "👨🏻";
+        };
+        img.src = url;
+        element.appendChild(img);
+    }
+
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    displayAvatar(button, user?.avatar_url);
+    displayAvatar(preview, user?.avatar_url);
+
+    button.addEventListener("click", () => {
+        modal.hidden = false;
+        close.focus();
+    });
+
+    function closeModal() {
+        modal.hidden = true;
+    }
+
+    close.addEventListener("click", closeModal);
+
+    modal.addEventListener("click", event => {
+        if (event.target === modal) closeModal();
+    });
+
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && !modal.hidden) closeModal();
+    });
+
+    choose.addEventListener("click", () => input.click());
+
+    input.addEventListener("change", () => {
+        const file = input.files[0];
+        if (!file) return;
+
+        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)
+            || file.size > 5 * 1024 * 1024) {
+            status.textContent = "Image JPG, PNG ou WEBP, 5 Mo maximum.";
+            save.disabled = true;
+            selectedFile = null;
+            return;
+        }
+
+        selectedFile = file;
+        save.disabled = false;
+        status.textContent = "Photo prête à être enregistrée.";
+
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        previewUrl = URL.createObjectURL(file);
+        displayAvatar(preview, previewUrl);
+    });
+
+    save.addEventListener("click", async () => {
+        if (!selectedFile) return;
+
+        save.disabled = true;
+        status.textContent = "Enregistrement...";
+
+        const formData = new FormData();
+        formData.append("avatar", selectedFile);
+
+        try {
+            const response = await fetch("/api/auth/avatar", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("access_token")}`
+                },
+                body: formData
+            });
+
+            const raw = await response.text();
+            let data;
+            try { data = raw ? JSON.parse(raw) : {}; }
+            catch { throw new Error(`Réponse serveur non JSON (HTTP ${response.status}). Vérifie la route /api/auth/avatar.`);}
+
+            if (!response.ok) {
+                throw new Error(data.error || data.msg || "Erreur d'enregistrement");
+            }
+
+            localStorage.setItem("user", JSON.stringify(data.user));
+
+            displayAvatar(button, data.user.avatar_url);
+            displayAvatar(preview, data.user.avatar_url);
+
+            selectedFile = null;
+            status.textContent = "Photo enregistrée avec succès !";
+            modal.hidden = true;
+
+            // Réinitialiser le champ de sélection
+            input.value = "";
+
+            // Afficher une confirmation
+            if (typeof showToast === "function") {
+                showToast("Photo de profil mise à jour !");
+            }
+
+        } catch (error) {
+            status.textContent = error.message;
+            save.disabled = false;
+        }
+    });
+});
+</script>
+<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+<script>
+// Fil d'activite unique : conversations et parties triees par date decroissante.
+document.addEventListener("DOMContentLoaded", () => {
+    const container = document.getElementById("activity-inbox");
+    if (!container) return;
+    const el = (tag, value, cls) => {
+        const node = document.createElement(tag);
+        if (value != null) node.textContent = String(value);
+        if (cls) node.className = cls;
+        return node;
+    };
+    const dateValue = value => {
+        if (!value) return null;
+        const parsed = new Date(value);
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
+    };
+    const timeLabel = date => {
+        if (!date) return "";
+        const now = new Date();
+        if (date.getFullYear() === now.getFullYear() &&
+            date.getMonth() === now.getMonth() && date.getDate() === now.getDate()) {
+            return date.toLocaleTimeString("en-US", {
+                hour: "numeric", minute: "2-digit", hour12: true
+            }).replace(/\s/g, "").toUpperCase();
+        }
+        return date.toLocaleDateString("en-US", {
+            month: "2-digit", day: "2-digit", year: "numeric"
+        });
+    };
+    const gameName = room => room.game_type === "PRESIDENT" ? "Président" : (room.game_type || "Jeu");
+    const authFetch = async (url, token) => {
+        const response = await fetch(url, {headers: {Authorization: "Bearer " + token}});
+        if (!response.ok) throw new Error(url + " : HTTP " + response.status);
+        return response.json();
+    };
+    async function refreshActivity() {
+        const token = localStorage.getItem("access_token");
+        if (!token) { container.textContent = "Session expirée : reconnecte-toi."; return; }
+        const responses = await Promise.allSettled([
+            authFetch("/api/users/messages/recent", token),
+            authFetch("/api/rooms/my", token),
+            authFetch("/api/groups", token)
+        ]);
+        const events = [];
+        if (responses[0].status === "fulfilled") {
+            const conversations = responses[0].value.conversations || [];
+            conversations.forEach(row => {
+                if (!row.friend) return;
+                const last = row.last_message || {};
+                events.push({kind: "message", date: dateValue(last.created_at), row});
+            });
+        }
+        if (responses[1].status === "fulfilled") {
+            const games = responses[1].value;
+            if (games.active_room) {
+                const room = games.active_room;
+                events.push({kind: "active", room,
+                    date: dateValue(room.last_activity_at || room.started_at || room.created_at)});
+            }
+            (games.recent_finished || []).forEach(room => events.push({
+                kind: "finished", room, date: dateValue(room.finished_at || room.created_at)
+            }));
+        }
+        if (responses[2].status === "fulfilled") {
+            (responses[2].value.groups || []).forEach(group => {
+                // Un groupe apparaît dans le fil uniquement après son premier message.
+                if (!group.last_message) return;
+                events.push({kind: "group", group,
+                    date: dateValue(group.last_message.created_at)});
+            });
+        }
+        events.sort((a, b) => (b.date ? b.date.getTime() : 0) - (a.date ? a.date.getTime() : 0));
+        const fragment = document.createDocumentFragment();
+        events.forEach(event => {
+            const item = el("button", "", "activity-message activity-event");
+            item.type = "button";
+            const stamp = el("span", timeLabel(event.date), "activity-time");
+            const content = el("span", "", "activity-message-body");
+            if (event.kind === "message") {
+                const {friend, last_message: last = {}, unread_count = 0} = event.row;
+                const avatar = el("span", "👤", "activity-avatar");
+                if (friend.avatar_url) {
+                    const img = document.createElement("img");
+                    img.src = friend.avatar_url;
+                    img.alt = "";
+                    img.onerror = () => img.remove();
+                    avatar.appendChild(img);
+                }
+                content.append(el("strong", friend.username || "Ami"), el("small", last.content || ""));
+                item.append(stamp, avatar, content);
+                if (Number(unread_count) > 0) item.appendChild(el("span", unread_count, "activity-count"));
+                item.addEventListener("click", () => {
+                    if (typeof openPrivateChat === "function") openPrivateChat(friend);
+                });
+                        } else if (event.kind === "group") {
+                const group = event.group;
+                const last = group.last_message || {};
+                const icon = el("span", "👥", "activity-game-icon");
+                const author = last.username ? last.username + " : " : "";
+                content.append(el("strong", group.name || "Groupe d'amis"),
+                               el("small", author + (last.content || "")));
+                item.append(stamp, icon, content);
+                item.title = "Ouvrir la conversation de groupe";
+                item.addEventListener("click", () => {
+                    if (typeof window.openFriendGroupChat === "function") {
+                        window.openFriendGroupChat(group.id);
+                    }
+                });
+            } else {
+                const room = event.room;
+                const icon = el("span", room.game_type === "PRESIDENT" ? "👑" : "🎮", "activity-game-icon");
+                if (event.kind === "finished") {
+                    const winner = room.winner_username;
+                    content.append(el("span", gameName(room) + (winner ? " · " + winner : ""), "activity-game-title"),
+                                   el("small", "Partie terminée"));
+                    // Historique consultable lorsque la page de resultats sera disponible.
+                    item.title = "Résultats détaillés à venir";
+                    item.addEventListener("click", () => {
+                        if (typeof showToast === "function") showToast("Résultats détaillés bientôt disponibles.");
+                    });
+                } else {
+                    content.append(el("span", gameName(room), "activity-game-title"),
+                                   el("small", room.status === "WAITING" ? "En attente · Reprendre" : "Partie en cours · Reprendre"));
+                    item.addEventListener("click", () => {location.href = "/room/" + encodeURIComponent(room.code);});
+                }
+                item.append(stamp, icon, content);
+            }
+            fragment.appendChild(item);
+       });
+        if (!events.length) {
+            const failures = responses.filter(r => r.status === "rejected");
+            fragment.appendChild(el("p", failures.length ? "Activité indisponible pour le moment." : "Aucune activité récente."));
+        }
+        container.replaceChildren(fragment);
+        responses.forEach((result, index) => {
+            if (result.status === "rejected") console.warn(["Conversations", "Mes parties", "Groupes"][index], result.reason);
+        });
+    }
+    refreshActivity();
+    document.addEventListener("visibilitychange", () => {if (!document.hidden) refreshActivity();});
+    setInterval(() => {if (!document.hidden) refreshActivity();}, 5000);
+    window.refreshLobbyActivity = refreshActivity;
+});
+</script>
+<script src="{{ url_for('static', filename='js/chat-common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+// Demandes d'amis : pavé autonome, sans dépendance aux fenêtres modales.
+document.addEventListener("DOMContentLoaded", () => {
+    const list = document.getElementById("social-friend-requests-list");
+    const count = document.getElementById("social-requests-count");
+    if (!list || !count) return;
+    let loading = false;
+    const empty = message => { list.replaceChildren(); const p = document.createElement("p"); p.textContent = message; list.appendChild(p); };
+    async function refreshRequests() {
+        if (loading) return;
+        loading = true;
+        try {
+            const token = localStorage.getItem("access_token");
+            if (!token) { empty("Reconnecte-toi pour voir tes demandes."); return; }
+            const response = await fetch("/api/users/friends/requests", {
+                headers: {Authorization: "Bearer " + token}
+            });
+            const raw = await response.text();
+            let data;
+            try { data = JSON.parse(raw); } catch { throw new Error("Réponse du serveur invalide (HTTP " + response.status + ")"); }
+            if (!response.ok) throw new Error(data.error || data.msg || "Erreur HTTP " + response.status);
+            const requests = data.requests || [];
+            count.textContent = String(requests.length);
+            list.replaceChildren();
+            if (!requests.length) { empty("Aucune demande en attente."); return; }
+            for (const request of requests) {
+                const row = document.createElement("div"); row.className = "social-request-row";
+                const avatar = document.createElement("span"); avatar.className = "social-request-avatar";
+                if (request.avatar_url) {
+                    const img = document.createElement("img"); img.src = request.avatar_url; img.alt = "";
+                    img.onerror = () => { img.remove(); avatar.textContent = "👤"; };
+                    avatar.appendChild(img);
+                } else avatar.textContent = "👤";
+                const name = document.createElement("strong"); name.className = "social-request-name";
+                name.textContent = request.username || "Joueur";
+                const actions = document.createElement("div"); actions.className = "social-request-actions";
+                async function respond(action) {
+                    reject.disabled = accept.disabled = true;
+                    try {
+                        const response = await fetch("/api/users/friends/requests/" + encodeURIComponent(request.id) + "/respond", {
+                            method: "POST", headers: {Authorization: "Bearer " + localStorage.getItem("access_token"), "Content-Type": "application/json"},
+                            body: JSON.stringify({action})
+                        });
+                        const raw = await response.text();
+                        let data;
+                        try { data = JSON.parse(raw); } catch { throw new Error("Réponse du serveur invalide (HTTP " + response.status + ")"); }
+                        if (!response.ok) throw new Error(data.error || data.msg || "Impossible de répondre à la demande.");
+                        if (typeof showToast === "function") showToast(data.message || "Demande traitée.");
+                        await refreshRequestsAfterAction();
+                        if (typeof loadDashboardFriends === "function") await loadDashboardFriends();
+                    } catch (error) {
+                        reject.disabled = accept.disabled = false;
+                        if (typeof showToast === "function") showToast(error.message);
+                        else alert(error.message);
+                    }
+                }
+                const reject = document.createElement("button"); reject.type = "button";
+                reject.className = "social-request-reject"; reject.textContent = "✕";
+                reject.setAttribute("aria-label", "Refuser la demande de " + name.textContent);
+                reject.title = "Refuser"; reject.onclick = () => respond("reject");
+                const accept = document.createElement("button"); accept.type = "button";
+                accept.className = "social-request-accept"; accept.textContent = "✓";
+                accept.setAttribute("aria-label", "Accepter la demande de " + name.textContent);
+                accept.title = "Accepter"; accept.onclick = () => respond("accept");
+                actions.append(reject, accept);
+                row.append(avatar, name, actions);
+                list.appendChild(row);
+            }
+        } catch (error) { empty(error.message || "Impossible de charger les demandes."); }
+        finally { loading = false; }
+    }
+    async function refreshRequestsAfterAction() {
+        // Le clic a lieu pendant qu'aucun rafraîchissement périodique n'est en cours.
+        await refreshRequests();
+    }
+    refreshRequests();
+    setInterval(() => { if (!document.hidden) refreshRequests(); }, 10000);
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshRequests(); });
+});
+</script>
+<script src="{{ url_for('static', filename='js/groups.js') }}"></script>
+</body>
+</html>

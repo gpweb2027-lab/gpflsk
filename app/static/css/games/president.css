@@ -1,0 +1,1824 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
+/* ============================================================
+   PRÉSIDENT — FEUILLE DE STYLE CONSOLIDÉE
+   Main SVG, rangées, sélection, joueurs, timer et dos adverses.
+   Version issue du CSS fourni le 18/10/2026.
+   ============================================================ */
+
+
+.president-table {
+    position: relative;
+
+    width: 100%;
+    min-height: 620px;
+
+    overflow: hidden;
+
+    border:
+        1px solid rgba(105, 85, 255, .28);
+
+    border-radius: 32px;
+
+    background:
+        radial-gradient(
+            ellipse at center,
+            #173b66 0%,
+            #0d294b 45%,
+            #08182e 100%
+        );
+
+    box-shadow:
+        inset 0 0 80px rgba(0, 0, 0, .28),
+        0 15px 40px rgba(0, 0, 0, .12);
+}
+
+.playing-card {
+    position: relative;
+
+    width: 76px;
+    height: 108px;
+
+    margin-left: -18px;
+
+    flex: 0 0 auto;
+
+    border: 2px solid #d8dfec;
+    border-radius: 10px;
+
+    color: #101828;
+    background: #f8fafc;
+
+    box-shadow:
+        0 8px 18px
+        rgba(0,0,0,.25);
+
+    cursor: pointer;
+
+    transition:
+        transform .18s ease,
+        border-color .18s ease;
+}
+
+.playing-card:first-child {
+    margin-left: 0;
+}
+
+
+/* =========================================================
+   MAIN COMPACTE STYLE PLATO
+   ========================================================= */
+
+
+/* cartes de la main */
+
+.president-local-hand .playing-card {
+    width: 62px;
+    height: 90px;
+
+    margin-left: -30px;
+
+    flex: 0 0 62px;
+
+    transition:
+        transform .18s ease,
+        border-color .18s ease;
+}
+
+
+/* première carte entièrement visible */
+
+.president-local-hand .playing-card:first-child {
+    margin-left: 0;
+}
+
+
+/* carte sélectionnée */
+
+.president-local-hand .playing-card.selected {
+    transform: translateY(-14px);
+}
+
+
+/* rang et symbole adaptés à la nouvelle taille */
+
+.president-local-hand .card-rank {
+    left: 7px;
+    top: 5px;
+
+    font-size: 16px;
+}
+
+.president-local-hand .card-suit {
+    font-size: 25px;
+}
+
+.playing-card:hover {
+    transform: translateY(-10px);
+}
+
+.playing-card.selected {
+    transform: translateY(-18px);
+
+    border-color: #8652ff;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(134, 82, 255, .20),
+        0 12px 25px
+        rgba(0,0,0,.35);
+}
+
+.card-rank {
+    position: absolute;
+
+    left: 8px;
+    top: 6px;
+
+    font-size: 18px;
+    font-weight: 900;
+}
+
+.card-suit {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform:
+        translate(-50%, -50%);
+
+    font-size: 31px;
+}
+
+.mini-card {
+    width: 54px;
+    height: 76px;
+
+    display: grid;
+    place-items: center;
+
+    border: 2px solid #d8dfec;
+    border-radius: 8px;
+
+    color: #111827;
+    background: white;
+
+    font-size: 16px;
+    font-weight: 900;
+
+    box-shadow:
+        0 7px 16px
+        rgba(0,0,0,.25);
+}
+
+.card-suit.red-suit {
+    color: #dc2626;
+}
+
+.results {
+    margin-bottom: 15px;
+
+    color: #9aabca;
+
+    font-size: 11px;
+}
+
+.president-turn-timer {
+    margin: 14px 0 20px;
+    padding: 12px 14px;
+
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    border-radius: 14px;
+
+    background: rgba(15, 23, 42, 0.55);
+}
+
+.president-turn-timer.hidden {
+    display: none;
+}
+
+.president-turn-timer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 8px;
+
+    font-size: 0.9rem;
+}
+
+#president-turn-time {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.president-turn-timer-track {
+    width: 100%;
+    height: 8px;
+
+    overflow: hidden;
+
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.president-turn-timer-progress {
+    width: 100%;
+    height: 100%;
+
+    border-radius: inherit;
+
+    background: linear-gradient(
+        90deg,
+        #6366f1,
+        #8b5cf6,
+        #a855f7
+    );
+
+    transition:
+        width 0.15s linear,
+        filter 0.2s ease;
+}
+
+.president-turn-timer.expiring
+.president-turn-timer-progress {
+    filter:
+        brightness(1.35)
+        saturate(1.5);
+}
+
+.president-turn-timer.expired
+.president-turn-timer-progress {
+    width: 0%;
+}
+
+/* =========================================================
+   TABLE PRESIDENT - JOUEURS
+   ========================================================= */
+
+.president-table-players {
+    position: absolute;
+    inset: 0;
+
+    z-index: 3;
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   CENTRE DE LA TABLE
+   ========================================================= */
+
+.president-table-center {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 160px;
+    min-height: 130px;
+
+    padding: 18px 24px;
+
+    border-radius: 22px;
+
+    background:
+        rgba(5, 15, 30, 0.22);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.04);
+
+    z-index: 2;
+}
+
+.table-center-label {
+    margin-bottom: 12px;
+
+    color: #cbd5e1;
+
+    font-size: 0.72rem;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.played-cards {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 80px;
+}
+
+
+/* =========================================================
+   JOUEUR
+   ========================================================= */
+
+.president-table-player {
+    position: absolute;
+
+    width: 120px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 7px;
+
+    transform: translate(-50%, -50%);
+
+    text-align: center;
+
+    z-index: 4;
+}
+
+
+/* =========================================================
+   AVATAR
+   ========================================================= */
+
+.president-player-avatar {
+    position: relative;
+
+    width: 58px;
+    height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border:
+        2px solid rgba(139, 92, 246, 0.7);
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            135deg,
+            #4338ca,
+            #7c3aed
+        );
+
+    color: white;
+
+    font-size: 1.15rem;
+    font-weight: 900;
+
+    box-shadow:
+        0 7px 20px rgba(0, 0, 0, .35),
+        0 0 18px rgba(124, 58, 237, .18);
+}
+.president-player-avatar {
+    overflow: hidden;
+}
+
+.president-player-avatar img {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+
+    border-radius: inherit;
+
+    user-select: none;
+    pointer-events: none;
+}
+
+/* =========================================================
+   JOUEUR ACTIF
+   ========================================================= */
+
+.president-table-player.is-current
+.president-player-avatar {
+    border-color: #facc15;
+
+    box-shadow:
+        0 0 0 4px rgba(250, 204, 21, .12),
+        0 0 25px rgba(250, 204, 21, .30);
+}
+
+.president-player-active {
+    position: absolute;
+
+    right: -8px;
+    top: -8px;
+
+    width: 25px;
+    height: 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #111827;
+
+    font-size: 0.72rem;
+
+    box-shadow:
+        0 3px 10px rgba(0, 0, 0, .4);
+}
+
+
+/* =========================================================
+   JOUEUR CONNECTÉ
+   ========================================================= */
+
+.president-table-player.is-me
+.president-player-avatar {
+    width: 66px;
+    height: 66px;
+
+    border-color: #60a5fa;
+
+    background:
+        linear-gradient(
+            135deg,
+            #2563eb,
+            #7c3aed
+        );
+}
+
+
+/* =========================================================
+   INFOS JOUEUR
+   ========================================================= */
+
+.president-player-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 2px;
+
+    padding: 5px 10px;
+
+    border-radius: 10px;
+
+    background:
+        rgba(3, 10, 24, .55);
+
+    backdrop-filter: blur(8px);
+}
+
+.president-player-name {
+    max-width: 115px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: #f8fafc;
+
+    font-size: .76rem;
+    font-weight: 800;
+}
+
+.president-player-cards {
+    color: #9fb2d2;
+
+    font-size: .67rem;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .president-table {
+        min-height: 430px;
+    }
+
+    .president-player-avatar {
+        width: 48px;
+        height: 48px;
+    }
+
+    .president-table-player.is-me
+    .president-player-avatar {
+        width: 55px;
+        height: 55px;
+    }
+
+    .president-player-info {
+        padding: 4px 7px;
+    }
+
+    .president-player-name {
+        max-width: 90px;
+        font-size: .68rem;
+    }
+
+    .president-player-cards {
+        font-size: .6rem;
+    }
+}
+
+
+/* =========================================================
+   BARRE DE TEMPS DU JOUEUR ACTIF
+   ========================================================= */
+
+.president-turn-mini-bar {
+    width: 78px;
+    height: 8px;
+
+    position: relative;
+
+    margin-top: 5px;
+    margin-left: 14px;
+
+    overflow: visible;
+
+    border-radius: 999px;
+
+    background: rgba(255,255,255,.14);
+
+    border:
+        1px solid rgba(255,255,255,.10);
+}
+
+.president-turn-clock {
+    position: absolute;
+
+    right: calc(100% + 5px);
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: #facc15;
+
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.president-turn-mini-progress {
+    width: 100%;
+    height: 100%;
+
+    border-radius: inherit;
+
+    background:
+        linear-gradient(
+            90deg,
+            #facc15,
+            #f59e0b
+        );
+
+    transition: width .05s linear;
+}
+
+.president-card-count {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 28px;
+    height: 22px;
+
+    margin-bottom: 3px;
+    padding: 0 7px;
+
+    border-radius: 999px;
+
+    background:
+        rgba(3, 10, 24, .82);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, .08);
+
+    color: #f8fafc;
+
+    font-size: .72rem;
+    font-weight: 900;
+
+    line-height: 1;
+}
+
+.president-player-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.president-presence-dot {
+    width: 7px;
+    height: 7px;
+
+    flex: 0 0 7px;
+
+    border-radius: 50%;
+    background: #65d329;
+
+    box-shadow:
+        0 0 7px rgba(101, 211, 41, .55);
+}
+
+/* =========================================================
+   AUDIO / MICROPHONE
+   ========================================================= */
+
+.president-audio-button {
+    width: 25px;
+    height: 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 3px auto 0;
+
+    padding: 0;
+
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 50%;
+
+    background: rgba(3,10,24,.82);
+
+    color: #ffffff;
+
+    font-size: 12px;
+
+    cursor: pointer;
+
+    transition:
+        transform .15s ease,
+        background .15s ease,
+        border-color .15s ease;
+}
+
+
+.president-audio-button:hover {
+    transform: scale(1.08);
+
+    border-color:
+        rgba(96,165,250,.65);
+
+    background:
+        rgba(30,64,175,.30);
+}
+
+
+.president-audio-button.is-muted {
+    opacity: .55;
+
+    border-color:
+        rgba(239,68,68,.45);
+
+    background:
+        rgba(127,29,29,.20);
+}
+
+
+.president-mic-button:not(.is-muted) {
+    border-color:
+        rgba(34,197,94,.45);
+
+    box-shadow:
+        0 0 8px
+        rgba(34,197,94,.15);
+}
+/* =========================================================
+   PRESIDENT — NOUVEAU LAYOUT
+   Basé sur le simulateur DEV
+   ========================================================= */
+
+.game-panel {
+    position: relative;
+}
+
+
+
+/* =========================================================
+   ÉLÉMENTS TECHNIQUES
+   ========================================================= */
+
+#turn-info,
+#hand-count,
+#selected-count {
+    display: none !important;
+}
+
+
+/* =========================================================
+   CALQUE DES JOUEURS
+   ========================================================= */
+
+.president-table-players {
+    position: absolute;
+    inset: 0;
+
+    z-index: 10;
+
+    pointer-events: none;
+}
+
+.president-table-player,
+.president-audio-button {
+    pointer-events: auto;
+}
+
+
+/* =========================================================
+   CENTRE DE TABLE
+   ========================================================= */
+
+.president-table-center {
+    position: absolute;
+
+    left: 50%;
+    top: 48%;
+
+    width: 230px;
+    height: 200px;
+
+    transform: translate(-50%, -50%);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+    min-width: 0;
+    min-height: 0;
+
+    border: 0;
+    border-radius: 0;
+
+    background: none;
+
+    z-index: 5;
+
+    pointer-events: none;
+}
+
+
+/* Zone où apparaissent réellement les cartes jouées */
+
+.center-play-zone {
+    position: relative;
+
+    width: 145px;
+    height: 120px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border:
+        1px dashed rgba(139, 92, 246, .45);
+
+    border-radius: 20px;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(139, 92, 246, .10) 0%,
+            rgba(59, 130, 246, .04) 55%,
+            transparent 75%
+        );
+
+    box-shadow:
+        inset 0 0 25px rgba(139, 92, 246, .08),
+        0 0 18px rgba(59, 130, 246, .06);
+
+    z-index: 2;
+}
+
+
+/* Cartes réellement jouées */
+
+.played-cards {
+    position: relative;
+
+    min-height: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 3;
+}
+
+
+/* =========================================================
+   SENS DU JEU
+   ========================================================= */
+
+.turn-direction {
+    position: absolute;
+    inset: 0;
+
+    z-index: 1;
+
+    pointer-events: none;
+}
+
+.direction-arrow {
+    position: absolute;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: rgba(96, 165, 250, .80);
+
+    font-size: 19px;
+    font-weight: 900;
+
+    text-shadow:
+        0 0 8px rgba(59, 130, 246, .65);
+
+    animation:
+        directionPulse 1.4s ease-in-out infinite;
+}
+
+.arrow-top {
+    left: 50%;
+    top: 20px;
+
+    transform: translateX(-50%);
+
+    animation-delay: 0s;
+}
+
+.arrow-right {
+    right: 20px;
+    top: 50%;
+
+    transform:
+        translateY(-50%)
+        rotate(90deg);
+
+    animation-delay: .2s;
+}
+
+.arrow-bottom {
+    left: 50%;
+    bottom: 20px;
+
+    transform:
+        translateX(-50%)
+        rotate(180deg);
+
+    animation-delay: .4s;
+}
+
+.arrow-left {
+    left: 20px;
+    top: 50%;
+
+    transform:
+        translateY(-50%)
+        rotate(-90deg);
+
+    animation-delay: .6s;
+}
+
+@keyframes directionPulse {
+
+    0%,
+    100% {
+        opacity: .35;
+    }
+
+    50% {
+        opacity: 1;
+
+        text-shadow:
+            0 0 12px rgba(59, 130, 246, .9);
+    }
+}
+
+
+/* =========================================================
+   MAIN DU JOUEUR LOCAL
+   ========================================================= */
+
+.president-local-hand {
+    position: absolute;
+
+    left: 50%;
+    bottom: 112px;
+
+    width: min(760px, calc(100% - 48px));
+
+    transform: translateX(-50%);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    z-index: 20;
+}
+
+
+
+/* =========================================================
+   BOUTONS JOUER / PASSER
+   ========================================================= */
+
+.president-hand-actions {
+    position: absolute;
+
+    left: 50%;
+    bottom: 72px;
+
+    width: min(700px, calc(100% - 80px));
+
+    transform: translateX(-50%);
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin: 0;
+
+    z-index: 30;
+}
+
+.president-hand-actions .game-action {
+    position: relative;
+
+    min-width: 78px;
+
+    padding: 8px 18px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    pointer-events: auto;
+}
+
+
+/* =========================================================
+   JOUEUR LOCAL
+   ========================================================= */
+
+.president-table-player.is-me {
+    top: auto !important;
+    bottom: 4px !important;
+
+    transform: translateX(-50%) !important;
+
+    z-index: 15;
+}
+
+
+/* =========================================================
+   QUITTER
+   ========================================================= */
+
+.president-leave-button {
+    position: absolute;
+
+    top: 14px;
+    right: 14px;
+
+    z-index: 30;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .president-table {
+        min-height: 560px;
+    }
+
+    .president-local-hand {
+        width: calc(100% - 24px);
+        bottom: 105px;
+    }
+
+    .president-local-hand .hand {
+            justify-content: center;
+            overflow: visible;
+    }
+
+    .president-hand-actions {
+        bottom: 66px;
+        width: calc(100% - 40px);
+    }
+}
+
+.local-hand-count {
+    width: 100%;
+    margin-bottom: 4px;
+
+    text-align: center;
+
+    color: #fff;
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1;
+
+    text-shadow:
+        0 2px 6px rgba(0, 0, 0, .45);
+}
+
+/* CARTES JOUÉES AU CENTRE */
+
+#current-play {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+#current-play .president-played-card {
+    display: block;
+    width: 58px;
+    height: auto;
+    flex-shrink: 0;
+    object-fit: contain;
+    filter: drop-shadow(0 5px 8px rgba(0, 0, 0, .35));
+}
+
+
+/* IMAGES SVG DES CARTES DE LA MAIN */
+
+#hand .playing-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+#hand .president-card-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+/* MAIN DU JOUEUR : CARTES RAPPROCHÉES */
+
+#hand {
+    justify-content: center;
+    column-gap: 12px;
+}
+
+#hand .playing-card {
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+/* La dernière carte reste entièrement visible */
+#hand .playing-card:last-child {
+    margin-right: 0;
+}
+
+/* Carte sélectionnée : elle passe devant les autres */
+#hand .playing-card.selected {
+    transform: translateY(-15px);
+}
+
+/* Espacement dynamique des cartes */
+
+#hand .playing-card {
+    margin-right: var(--card-overlap, 0px);
+}
+
+#hand .playing-card:last-child {
+    margin-right: 0;
+}
+
+/* =========================================
+   MAIN PRÉSIDENT — RANGÉES DE 13 CARTES
+   ========================================= */
+
+#hand.hand,
+.president-local-hand .hand,
+.president-local-hand .hand.two-rows {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    width: max-content;
+    max-width: 100%;
+
+    flex-wrap: nowrap;
+    gap: 8px;
+
+    overflow: visible;
+}
+
+#hand .president-hand-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+
+    width: max-content;
+    max-width: 100%;
+
+    flex-wrap: nowrap;
+}
+
+#hand .president-hand-row .playing-card {
+    width: 62px;
+    height: 90px;
+
+    flex: 0 0 62px;
+
+    margin-left: 0;
+    margin-right: -34px;
+}
+
+#hand .president-hand-row .playing-card:last-child {
+    margin-right: 0;
+}
+
+#hand .president-hand-row .playing-card.selected {
+    transform: translateY(-15px);
+}
+
+/* CARTES NON JOUABLES : CONTOUR GRIS */
+
+#hand .playing-card.unplayable {
+    opacity: 1;
+    filter: none;
+    border: 2px solid #8993a3;
+    cursor: default;
+}
+
+#hand .playing-card.unplayable:hover {
+    transform: none;
+}
+
+/* CARTES JOUABLES : CONTOUR VERT */
+
+#hand .playing-card:not(.unplayable) {
+    opacity: 1;
+    filter: none;
+    border: 2px solid #22c55e;
+    cursor: pointer;
+}
+
+/* CARTE SÉLECTIONNÉE : CONTOUR VIOLET */
+
+#hand .playing-card.selected:not(.unplayable) {
+    border: 2px solid #a855f7;
+    transform: translateY(-15px);
+}
+
+/* RAPPROCHER VERTICALEMENT LES RANGÉES */
+
+#hand {
+    row-gap: 0;
+    gap: 0;
+    overflow: visible;
+}
+
+/* Chaque rangée conserve sa disposition */
+#hand .president-hand-row {
+    position: relative;
+    flex-shrink: 0;
+}
+
+/* La rangée suivante recouvre les 2/3 de la précédente */
+#hand .president-hand-row + .president-hand-row {
+    margin-top: -60px;
+}
+
+/* La rangée du bas reste devant */
+#hand .president-hand-row {
+    z-index: 1;
+}
+
+#hand .president-hand-row + .president-hand-row {
+    z-index: 2;
+}
+
+/* AUDIO + NOM + PRÉSENCE : MÊME LIGNE */
+
+.president-player-name-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
+.president-player-name-row .president-audio-button {
+    position: static;
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.president-player-name-row .president-player-name {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.president-player-name-row .president-presence-dot {
+    flex-shrink: 0;
+}
+
+/* BOUTONS JOUER / PASSER AU NIVEAU DU NOM */
+
+#play-btn,
+#pass-btn {
+    transform: translateY(65px);
+}
+
+/* ============================================================
+   DOS DES CARTES DES ADVERSAIRES — UNE CARTE PAR CARTE RESTANTE
+   Les compteurs affichent le nombre réel envoyé par le serveur.
+   ============================================================ */
+
+/* Le paquet précède visuellement l'avatar, puis le pseudo et le compteur. */
+.president-table-player:not(.is-me) .president-opponent-cards {
+    order: -1;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    width: max-content;
+    max-width: none;
+    height: 30px;
+    margin: 0 auto 4px;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.president-table-player:not(.is-me) .president-opponent-cards .president-card-back {
+    position: relative;
+    display: block;
+    left: auto;
+    right: auto;
+    top: auto;
+    width: 42px;
+    height: 60px;
+    flex: 0 0 42px;
+    margin: 0 0 0 -35px;
+    transform: none;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .35));
+    user-select: none;
+    pointer-events: none;
+}
+
+.president-table-player:not(.is-me) .president-opponent-cards .president-card-back:first-child {
+    margin-left: 0;
+}
+
+/* Pseudo et audio sous l'avatar ; compteur sous les informations. */
+.president-table-player:not(.is-me) .president-player-avatar { order: 0; }
+.president-table-player:not(.is-me) .president-player-info { order: 1; }
+.president-table-player:not(.is-me) .president-card-count {
+    order: 2;
+    position: static;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #f8fafc;
+    font-size: 12px;
+    font-weight: 900;
+    transform: none;
+}
+
+/* Sur les côtés, les dos forment une colonne compacte. */
+.president-table-player.player-left:not(.is-me) .president-opponent-cards,
+.president-table-player.player-right:not(.is-me) .president-opponent-cards {
+    position: absolute;
+    top: 50%;
+    bottom: auto;
+    width: 60px;
+    height: 155px;
+    margin: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
+    transform: translateY(-50%);
+}
+
+.president-table-player.player-left:not(.is-me) .president-opponent-cards {
+    left: auto;
+    right: calc(100% + 8px);
+}
+
+.president-table-player.player-right:not(.is-me) .president-opponent-cards {
+    left: calc(100% + 8px);
+    right: auto;
+}
+
+.president-table-player.player-left:not(.is-me) .president-card-back,
+.president-table-player.player-right:not(.is-me) .president-card-back {
+    width: 42px;
+    height: 60px;
+    flex: 0 0 60px;
+    margin: -52px 0 0;
+    transform: rotate(90deg);
+}
+
+.president-table-player.player-left:not(.is-me) .president-card-back:first-child,
+.president-table-player.player-right:not(.is-me) .president-card-back:first-child {
+    margin-top: 0;
+}
+
+/* ============================================================
+   CORRECTION : PAQUET HORIZONTAL DES ADVERSAIRES EN HAUT
+   1 dos par carte, moitié visible, au-dessus de l’avatar.
+   ============================================================ */
+.president-table-player.player-top:not(.is-me) .president-opponent-cards {
+    position: absolute !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    top: auto !important;
+    bottom: calc(100% + 8px) !important;
+    left: 50% !important;
+    right: auto !important;
+    width: max-content !important;
+    max-width: none !important;
+    height: 30px !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    transform: translateX(-50%) !important;
+}
+.president-table-player.player-top:not(.is-me) .president-opponent-cards .president-card-back {
+    position: relative !important;
+    display: block !important;
+    width: 42px !important;
+    height: 60px !important;
+    flex: 0 0 42px !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    margin: 0 0 0 -35px !important;
+    transform: none !important;
+}
+.president-table-player.player-top:not(.is-me) .president-opponent-cards .president-card-back:first-child {
+    margin-left: 0 !important;
+}
+/* POSITION DES ADVERSAIRES EN HAUT */
+
+/* Remonter l'ensemble du joueur adverse */
+.president-table-player.player-top:not(.is-me) {
+    transform: translateY(-35px);
+}
+
+/* Remonter davantage les dos de cartes */
+.president-table-player.player-top:not(.is-me)
+.president-opponent-cards {
+    bottom: calc(100% + 35px);
+}
+
+/* Garder les 26 dos sur une rangée horizontale */
+.president-table-player.player-top:not(.is-me)
+.president-opponent-cards {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+/* ==========================================
+   ADVERSAIRES DU HAUT — STYLE SIMULATION DEV
+   ========================================== */
+
+/* Ordre vertical : cartes, timer, nom, avatar, compteur */
+.president-table-player.player-top:not(.is-me) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Dos des cartes : une carte par carte restante */
+.president-table-player.player-top:not(.is-me)
+.president-opponent-cards {
+    position: relative !important;
+    order: 0;
+
+    top: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+
+    transform: none !important;
+
+    display: flex !important;
+    flex-direction: row !important;
+
+    width: max-content !important;
+    height: 42px !important;
+    align-items: flex-end !important;
+
+    margin: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Barre de temps sous les cartes */
+.president-table-player.player-top:not(.is-me)
+.president-turn-mini-bar {
+    order: 1;
+    margin: 0 auto;
+}
+
+/* Nom et haut-parleur */
+.president-table-player.player-top:not(.is-me)
+.president-player-info {
+    order: 2;
+    padding: 0;
+    background: transparent;
+    backdrop-filter: none;
+}
+
+/* Avatar */
+.president-table-player.player-top:not(.is-me)
+.president-player-avatar {
+    order: 3;
+}
+
+/* Compteur sous l'avatar */
+.president-table-player.player-top:not(.is-me)
+.president-card-count {
+    order: 4;
+    position: static !important;
+    margin: 0 !important;
+    transform: none !important;
+}
+
+/* Position de l'adversaire en haut */
+.president-table-player.player-top:not(.is-me) {
+    top: 85px !important;
+    transform: translate(-50%, -50%) !important;
+}
+
+/* Afficher la moitié BASSE des dos de cartes */
+.president-table-player.player-top:not(.is-me)
+.president-opponent-cards .president-card-back {
+    position: relative !important;
+
+    top: auto !important;
+    bottom: auto !important;
+
+    transform: translateY(-18px) !important;
+}
+
+.president-player-avatar {
+    overflow: hidden;
+}
+
+.president-player-avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Commandes illustrées Président */
+.president-hand-actions { display:flex; justify-content:space-between; align-items:center; width:100%; gap:14px; }
+.president-hand-actions #pass-btn { order:1; margin-right:auto; }
+.president-hand-actions #play-btn { order:2; margin-left:auto; }
+.president-icon-action { width:74px; height:74px; min-width:74px; padding:0; border:0; background:transparent; border-radius:50%; cursor:pointer; display:grid; place-items:center; transition:transform .15s ease, opacity .15s ease, filter .15s ease; }
+.president-icon-action img { display:block; width:100%; height:100%; object-fit:contain; pointer-events:none; }
+.president-icon-action:not(:disabled):hover { transform:scale(1.07); filter:brightness(1.12); }
+.president-icon-action:disabled { opacity:.34; filter:grayscale(.8); cursor:not-allowed; }
+.president-icon-action:focus-visible { outline:3px solid #fff; outline-offset:3px; }
+.president-table-center .played-cards { display:none; }
+.president-last-plays { display:flex; align-items:end; justify-content:center; gap:clamp(4px,1vw,12px); max-width:100%; }
+.president-history-item { min-width:0; display:flex; flex-direction:column; align-items:center; gap:4px; }
+.president-history-name { color:white; font-size:clamp(9px,1.3vw,12px); font-weight:700; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.president-history-cards { display:flex; justify-content:center; padding-right:8px; }
+.president-history-cards img { width:clamp(19px,3.2vw,39px); height:auto; max-height:55px; margin-right:-8px; filter:drop-shadow(0 2px 3px #0007); }
+@media(max-width:600px) { .president-icon-action {width:56px;height:56px;min-width:56px;} .president-history-cards img {width:23px;} }
+
+/* ============================================================
+   MISE AU PROPRE — historique et commandes (sans empilement)
+   ============================================================ */
+.president-table .president-table-center {
+    left: auto;
+    right: clamp(12px, 3%, 38px);
+    top: 49%;
+    transform: translateY(-50%);
+    width: clamp(145px, 21%, 230px);
+    height: auto;
+    min-width: 0;
+    min-height: 0;
+    padding: 12px;
+    pointer-events: none;
+}
+.president-table .president-last-plays {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 9px;
+}
+.president-table .president-history-item {
+    align-items: flex-start;
+    padding: 5px 8px;
+    border-radius: 9px;
+    background: rgba(7,19,37,.5);
+}
+.president-table .president-history-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 0;
+}
+.president-table .president-history-symbol {
+    color: #fff;
+    font-size: clamp(13px, 1.5vw, 18px);
+    font-weight: 800;
+}
+.president-table .president-history-symbol.is-red { color: #ff8b8b; }
+
+/* Les boutons sont dans la main du joueur : on les place SOUS
+   cette main, mais encore DANS le tapis. */
+.president-table .president-local-hand { overflow: visible; }
+.president-table .president-local-hand .president-hand-actions {
+    position: absolute;
+    left: 50%;
+    right: auto;
+    top: auto;
+    bottom: -94px;
+    transform: translateX(-50%);
+    width: min(920px, calc(100% + 160px));
+    height: 74px;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 30;
+    pointer-events: none;
+}
+.president-table .president-hand-actions #pass-btn,
+.president-table .president-hand-actions #play-btn {
+    position: static;
+    transform: none;
+    margin: 0;
+    pointer-events: auto;
+}
+.president-table .president-hand-actions #pass-btn { order: 1; }
+.president-table .president-hand-actions #play-btn { order: 2; }
+@media (max-width: 900px) {
+    .president-table .president-local-hand .president-hand-actions {
+        bottom: -90px;
+        width: min(100%, 720px);
+    }
+}
+@media (max-width: 650px) {
+    .president-table .president-table-center { right: 8px; width: 125px; }
+    .president-table .president-local-hand .president-hand-actions {
+        bottom: -91px;
+        width: 100%;
+        height: 56px;
+    }
+}
+
+/* Placement définitif : boutons ancrés au tapis, non à la main. */
+.president-table { position: relative; }
+.president-table .president-local-hand .president-hand-actions {
+    position: fixed; /* remplacé en JS par absolute après déplacement dans le tapis */
+}
+.president-table > .president-hand-actions {
+    position: absolute !important; left: 16px !important; right: 16px !important;
+    bottom: 12px !important; top: auto !important; transform: none !important;
+    width: auto !important; height: 74px; margin: 0 !important; padding: 0 !important;
+    display: flex !important; justify-content: space-between !important;
+    z-index: 60 !important; pointer-events: none;
+}
+.president-table > .president-hand-actions button { pointer-events: auto; }
+@media(max-width:650px) { .president-table > .president-hand-actions { height:56px; bottom:8px !important; } }
+
+/* ============================================================
+   PRESIDENT ROYAL — HABILLAGE 2026
+   Surcharge visuelle : ne change ni les tours ni les actions JS.
+   ============================================================ */
+
+#game-panel { font-family: 'Outfit', system-ui, sans-serif; }
+#game-panel .president-table {
+  isolation: isolate; min-height: 650px; overflow: hidden;
+  border: 1px solid rgba(246,187,82,.58); border-radius: 28px;
+  background:
+    radial-gradient(ellipse at 50% 55%, rgba(21,74,135,.52), transparent 61%),
+    repeating-linear-gradient(145deg, transparent 0 80px, rgba(130,173,255,.025) 81px 82px),
+    linear-gradient(135deg,#06142d,#0a2a50 53%,#06132a);
+  box-shadow: inset 0 0 0 7px rgba(5,16,38,.6), inset 0 0 0 8px rgba(241,177,69,.2), inset 0 0 75px #020a1e, 0 0 26px #163d7444;
+}
+#game-panel .president-table::before,
+#game-panel .president-table::after { content:'♠'; position:absolute; z-index:0; font-size:105px; color:#dfaa4e20; line-height:1; pointer-events:none; }
+#game-panel .president-table::before { left:18px; top:14px; transform:rotate(-23deg); }
+#game-panel .president-table::after { right:18px; bottom:12px; transform:rotate(157deg); }
+#game-panel .president-royal-art { position:absolute; inset:12% 10% 16%; z-index:1; pointer-events:none; display:grid; place-items:center; opacity:.85; }
+#game-panel .president-royal-orbit { position:absolute; width:min(69%,570px); aspect-ratio:1.65; border-radius:50%; border:2px solid #e6aa4a66; box-shadow:0 0 0 9px #b77a1920,0 0 0 22px #a8751c14,inset 0 0 22px #f3ba5538,0 0 30px #e4a33a2c; transform:rotate(-12deg); }
+#game-panel .president-royal-arrows { width:min(94%,780px); max-height:100%; overflow:visible; filter:drop-shadow(0 0 7px #f7ae49b0); }
+#game-panel .president-royal-emblem { position:absolute; display:flex; flex-direction:column; align-items:center; gap:0; color:#e9b85c; text-shadow:0 0 25px #d69b3950; opacity:.45; }
+#game-panel .president-royal-emblem span { font-size:clamp(68px,11vw,145px); line-height:1; }
+#game-panel .president-royal-emblem small { font-size:clamp(10px,1.3vw,16px); letter-spacing:.4em; font-weight:800; }
+/* Le calque décoratif reste derrière les joueurs, la main et les boutons. */
+#game-panel .president-table-players { z-index:10; pointer-events:none; }
+#game-panel .president-table-player { z-index:12; pointer-events:auto; }
+#game-panel .president-player-avatar { border-color:#eab653; box-shadow:0 0 0 3px #e6a84633,0 0 20px #eab65355; }
+#game-panel .president-table-player.is-current .president-player-avatar { box-shadow:0 0 0 4px #ffca6b55,0 0 25px #fbbf24a0; }
+#game-panel .president-player-info { background:rgba(2,12,31,.72); border:1px solid #d6a14a30; }
+#game-panel .president-player-name { font-family:inherit; font-weight:700; }
+/* Historique discret, à droite, sans cartes PNG ni encadrés. */
+#game-panel .president-table .president-table-center { z-index:7; right:clamp(12px,3%,35px); top:48%; width:clamp(115px,18%,190px); background:transparent; border:0; padding:5px; align-items:stretch; pointer-events:none; }
+#game-panel .table-center-label { font:700 10px/1.4 'Outfit',sans-serif; letter-spacing:.14em; color:#f3d397; text-align:left; margin-bottom:9px; }
+#game-panel .president-table .president-history-item { background:transparent; border:0; border-radius:0; padding:4px 0; gap:2px; }
+#game-panel .president-table .president-history-item:nth-child(1) { opacity:.45; }
+#game-panel .president-table .president-history-item:nth-child(2) { opacity:.7; }
+#game-panel .president-history-name { color:#e8eefb; font-family:inherit; }
+#game-panel .president-history-symbol { font-family:inherit; }
+/* Boutons ancrés au bas du tapis, sans empiéter sur la main. */
+#game-panel .president-table > .president-hand-actions { left:20px !important; right:20px !important; bottom:13px !important; z-index:60 !important; }
+#game-panel .president-icon-action { filter:drop-shadow(0 0 12px #d5a14455); }
+#game-panel .president-icon-action:disabled { opacity:.36; filter:grayscale(.7); }
+#game-panel .president-icon-action:not(:disabled):hover { filter:drop-shadow(0 0 16px #e9b954a0); }
+#game-panel .president-local-hand { z-index:20; }
+/* Masquer visuellement Quitter sans supprimer son ID ni ses listeners. */
+#game-panel .president-leave-button { display:none !important; }
+#game-panel .president-room-menu { position:absolute; top:12px; right:14px; z-index:100; }
+#game-panel .president-menu-trigger { display:grid; place-items:center; width:40px; height:40px; border:1px solid #e6b95a70; border-radius:12px; color:#f4d38e; background:#081a37e8; font-size:28px; line-height:1; cursor:pointer; }
+#game-panel .president-menu-list { position:absolute; top:46px; right:0; min-width:235px; padding:6px; border:1px solid #dba94d66; border-radius:14px; background:#07172ff5; box-shadow:0 16px 35px #0009; }
+#game-panel .president-menu-list[hidden] { display:none; }
+#game-panel .president-menu-list button { display:block; width:100%; padding:11px 12px; text-align:left; color:#e8eefb; background:transparent; border:0; border-radius:8px; font:500 13px 'Outfit',sans-serif; cursor:pointer; }
+#game-panel .president-menu-list button:hover { background:#29456c; }
+@media(max-width:700px) {
+ #game-panel .president-table { min-height:540px; }
+ #game-panel .president-royal-art { inset:19% 5% 20%; opacity:.55; }
+ #game-panel .president-table .president-table-center { top:43%; right:5px; width:100px; }
+ #game-panel .president-royal-emblem span { font-size:65px; }
+ #game-panel .president-table > .president-hand-actions { left:7px !important; right:7px !important; }
+}
+
+/* === PODIUM ROYAL : une seule source de mise en page === */
+#game-panel .president-royal-layout{display:grid;grid-template-columns:126px minmax(0,1fr);gap:14px;align-items:stretch;min-width:0}
+#game-panel .president-royal-layout>.president-table{width:100%;min-width:0;margin:0}
+#game-panel .president-royal-podium{border:1px solid #b88b3d8c;border-radius:20px;background:linear-gradient(165deg,#07172d 0%,#10284c 55%,#07152b 100%);box-shadow:inset 0 0 28px #d6a64b13,0 0 18px #061b37;min-height:500px;display:flex;align-items:center;padding:12px 7px;position:relative;overflow:hidden}
+#game-panel .president-royal-podium:before{content:'♛';position:absolute;top:5px;left:0;right:0;text-align:center;color:#f7c65d;font-size:23px;opacity:.75}
+#game-panel .president-podium-list{display:flex;flex-direction:column;width:100%;gap:9px;padding-top:22px}
+#game-panel .president-podium-entry{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;padding:9px 3px 11px;border-bottom:1px solid #cda24a24}
+#game-panel .president-podium-entry:last-child{border-bottom:0}
+#game-panel .president-podium-rank{font:800 13px Outfit,sans-serif;color:#e9c77d}
+#game-panel .president-podium-entry[data-rank="1"] .president-podium-rank{color:#ffd25b}
+#game-panel .president-podium-entry[data-rank="2"] .president-podium-rank{color:#cddcf0}
+#game-panel .president-podium-entry[data-rank="3"] .president-podium-rank{color:#e6a36b}
+#game-panel .president-podium-avatar{display:grid;place-items:center;width:55px;height:55px;overflow:hidden;border-radius:50%;border:2px solid #c7a45e;background:linear-gradient(140deg,#15375b,#08152c);color:#fff;font:700 22px Outfit,sans-serif;box-shadow:0 0 13px #e9b75b40;cursor:pointer}
+#game-panel .president-podium-avatar img{width:100%;height:100%;object-fit:cover}
+#game-panel .president-podium-avatar:disabled{cursor:default;opacity:.5}
+#game-panel .president-podium-name{font:650 11px Outfit,sans-serif;color:#f3e7d0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#game-panel .president-podium-status{font:500 10px Outfit,sans-serif;color:#a8bbd2}
+#game-panel .president-podium-entry[data-rank="1"] .president-podium-status{color:#ffd25b}
+#game-panel .president-podium-entry.is-empty{opacity:.6}
+/* Informations redondantes supprimées, la flèche de retour reste présente. */
+.room-header .game-badge,.room-header #room-info,.room-header .room-code{display:none!important}
+@media(max-width:800px){#game-panel .president-royal-layout{grid-template-columns:78px minmax(0,1fr);gap:7px}#game-panel .president-royal-podium{min-height:450px;padding:8px 2px;border-radius:12px}#game-panel .president-podium-avatar{width:40px;height:40px}#game-panel .president-podium-name{font-size:9px}#game-panel .president-podium-entry{padding:7px 2px}}
+/* ============================================================
+   CORRECTIONS AFFICHAGE — 20/10/2026
+   Le compteur circulaire reste intact ; l'ancienne jauge est masquée.
+   ============================================================ */
+#game-panel .president-turn-mini-bar,
+#game-panel .president-turn-clock,
+#game-panel .president-turn-mini-progress { display: none !important; }
+
+/* Le centre des cartes jouées est indépendant du panneau Derniers coups. */
+#game-panel .president-table > #current-play.played-cards {
+    position: absolute;
+    left: 50%;
+    top: 47%;
+    transform: translate(-50%, -50%);
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    width: max-content;
+    max-width: min(55%, 360px);
+    min-height: 92px;
+    z-index: 8;
+    pointer-events: none;
+    gap: 0;
+}
+#game-panel .president-table > #current-play .president-played-card {
+    flex: 0 0 auto;
+    max-width: none;
+}
+/* Historique : les passes sont lisibles sur une seule ligne. */
+#game-panel .president-table .president-history-cards {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow: visible;
+}
+#game-panel .president-history-pass {
+    display: inline-block;
+    white-space: nowrap;
+    color: #f2d7a0;
+    font: 600 clamp(9px, .85vw, 12px)/1.3 'Outfit', sans-serif;
+    letter-spacing: -.02em;
+}
+#game-panel .president-table .president-table-center {
+    width: clamp(155px, 20%, 225px);
+}
+@media (max-width: 700px) {
+    #game-panel .president-table > #current-play.played-cards {
+        top: 46%;
+        max-width: 48%;
+    }
+    #game-panel .president-table .president-table-center {
+        width: 135px;
+        right: 4px;
+    }
+    #game-panel .president-history-pass { font-size: 9px; }
+}
+
+/* ============================================================
+   DISPOSITION COMPACTE VALIDÉE — 20/10/2026
+   Présence | pseudo | nombre de cartes | micro / haut-parleur
+   Aucun changement au timer circulaire ou aux actions du jeu.
+   ============================================================ */
+#game-panel .president-table-player .president-player-info {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    width: max-content;
+    max-width: 230px;
+    overflow: visible;
+}
+#game-panel .president-table-player .president-player-name-row {
+    display: flex !important;
+    flex-flow: row nowrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 6px !important;
+    width: max-content;
+    max-width: 230px;
+    white-space: nowrap;
+}
+#game-panel .president-player-name-row .president-presence-dot {
+    order: 0; margin: 0 !important; flex: 0 0 7px;
+}
+#game-panel .president-player-name-row .president-player-name {
+    order: 1; min-width: 0; max-width: 105px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+#game-panel .president-player-name-row .president-card-count {
+    order: 2; display: inline-flex !important; position: static !important;
+    align-items: center; justify-content: center;
+    min-width: 16px; height: auto; padding: 0 !important;
+    margin: 0 !important; border: 0 !important; border-radius: 0 !important;
+    background: transparent !important; box-shadow: none !important;
+    color: #f7e1a9; font-size: 12px; line-height: 1.2;
+    transform: none !important;
+}
+#game-panel .president-player-name-row .president-audio-button {
+    order: 3; flex: 0 0 23px; width: 23px; height: 23px;
+    margin: 0 !important; border: 0 !important; border-radius: 0 !important;
+    background: transparent !important; box-shadow: none !important;
+    padding: 0; color: #fff;
+}
+/* Le nom du joueur du bas se place juste sous son avatar. */
+#game-panel .president-table-player.is-me .president-player-avatar { order: 0; }
+#game-panel .president-table-player.is-me .president-player-info { order: 1; }
+/* Chez l'adversaire du haut : dos, nom, avatar. */
+#game-panel .president-table-player.player-top:not(.is-me) .president-player-info { order: 1; }
+#game-panel .president-table-player.player-top:not(.is-me) .president-player-avatar { order: 2; }
+#game-panel .president-table-player.player-top:not(.is-me) .president-opponent-cards { order: 0; }
+@media(max-width:700px) {
+  #game-panel .president-table-player .president-player-name-row { gap: 4px !important; max-width: 175px; }
+  #game-panel .president-player-name-row .president-player-name { max-width: 75px; }
+  #game-panel .president-player-name-row .president-card-count { font-size: 11px; }
+}

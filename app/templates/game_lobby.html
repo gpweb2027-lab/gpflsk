@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/games.css') }}"
+>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="game-browser">
+
+    <!-- HEADER -->
+    <header class="game-browser-header">
+
+        <a
+            href="/lobby"
+            class="game-back-button"
+            aria-label="Retour aux jeux"
+        >
+            ←
+        </a>
+
+        <div class="game-browser-identity">
+
+            <div class="game-browser-icon">
+                {{ game.emoji }}
+            </div>
+
+            <div>
+                <span class="game-browser-badge">
+                    JEU MULTIJOUEUR
+                </span>
+
+                <h1>
+                    {{ game.name }}
+                </h1>
+
+                <div class="game-browser-meta">
+
+                    <span>
+                        👥
+                        {{ game.min_players }}
+                        à
+                        {{ game.max_players }}
+                        joueurs
+                    </span>
+
+                    <span>
+                        ⏱
+                        {{ game.turn_timeout }}
+                        s / tour
+                    </span>
+
+                </div>
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- HERO -->
+    <section class="game-browser-hero">
+
+        <div>
+
+            <span class="game-browser-badge">
+                {{ game.emoji }}
+                {{ game.name|upper }}
+            </span>
+
+            <h2>
+                Trouve ta prochaine partie
+            </h2>
+
+            <p>
+                Rejoins une salle en attente ou crée
+                ton propre salon et invite tes amis.
+            </p>
+
+        </div>
+
+        <button
+            id="create-game-room"
+            class="create-room-button"
+            type="button"
+        >
+            <span>＋</span>
+            Créer une partie
+        </button>
+
+    </section>
+
+
+    <!-- ROOMS -->
+    <section class="available-games-panel">
+
+        <div class="available-games-heading">
+
+            <div>
+                <h2>
+                    Parties disponibles
+                </h2>
+
+                <p>
+                    Salons actuellement ouverts
+                    aux nouveaux joueurs.
+                </p>
+            </div>
+
+            <button
+                id="refresh-game-rooms"
+                class="refresh-rooms-button"
+                type="button"
+            >
+                ↻ Actualiser
+            </button>
+
+        </div>
+
+
+        <div
+            id="game-rooms"
+            class="game-room-list"
+        >
+            <div class="rooms-loading">
+                Chargement des parties...
+            </div>
+        </div>
+
+    </section>
+<!-- CREATE ROOM MODAL -->
+<div
+    id="create-room-modal"
+    class="room-modal hidden"
+    aria-hidden="true"
+>
+    <div class="room-modal-backdrop"></div>
+
+    <div
+        class="room-modal-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="create-room-title"
+    >
+
+        <div class="room-modal-header">
+            <div>
+                <span class="game-browser-badge">
+                    {{ game.emoji }} {{ game.name|upper }}
+                </span>
+
+                <h2 id="create-room-title">
+                    Créer une partie
+                </h2>
+
+                <p>
+                    Configure ton salon avant de lancer les invitations.
+                </p>
+            </div>
+
+            <button
+                id="close-create-room-modal"
+                class="room-modal-close"
+                type="button"
+                aria-label="Fermer"
+            >
+                ×
+            </button>
+        </div>
+
+
+        <div class="room-create-section">
+
+            <span class="room-create-label">
+                Type de partie
+            </span>
+
+            <div class="room-choice-grid">
+
+                <button
+                    type="button"
+                    class="room-choice selected"
+                    data-room-mode="NORMAL"
+                >
+                    <strong>🎮 Normal</strong>
+                    <span>Une partie classique</span>
+                </button>
+
+                <button
+                    type="button"
+                    class="room-choice"
+                    data-room-mode="TOURNAMENT"
+                >
+                    <strong>🏆 Tournoi</strong>
+                    <span>Mode compétition</span>
+                </button>
+
+            </div>
+        </div>
+
+
+        <div class="room-create-section">
+
+            <span class="room-create-label">
+                Visibilité
+            </span>
+
+            <div class="room-choice-grid">
+
+                <button
+                    type="button"
+                    class="room-choice selected"
+                    data-room-visibility="PUBLIC"
+                >
+                    <strong>🌍 Publique</strong>
+                    <span>Visible par tous</span>
+                </button>
+
+                <button
+                    type="button"
+                    class="room-choice"
+                    data-room-visibility="PRIVATE"
+                >
+                    <strong>🔒 Privée</strong>
+                    <span>Uniquement sur invitation</span>
+                </button>
+
+            </div>
+        </div>
+
+
+        <div class="room-create-section">
+
+            <div class="room-player-heading">
+                <span class="room-create-label">
+                    Nombre de joueurs
+                </span>
+
+                <strong id="selected-player-count">
+                    {{ game.min_players }}
+                </strong>
+            </div>
+
+            <div
+                id="player-count-options"
+                class="player-count-options"
+            >
+            </div>
+
+        </div>
+
+
+        <div class="room-modal-actions">
+
+            <button
+                id="cancel-create-room"
+                type="button"
+                class="room-modal-cancel"
+            >
+                Annuler
+            </button>
+
+            <button
+                id="confirm-create-room"
+                type="button"
+                class="create-room-button"
+            >
+                Créer la partie
+            </button>
+
+        </div>
+
+    </div>
+</div>
+</div>
+
+
+<script>
+    const currentGameType =
+        {{ game_type|tojson }};
+
+    const currentGameConfig =
+        {{ game|tojson }};
+</script>
+
+<script
+    src="{{ url_for('static', filename='js/game_lobby.js') }}"
+></script>
+
+{% endblock %}

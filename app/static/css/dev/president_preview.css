@@ -1,0 +1,1005 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+
+    min-height: 100vh;
+
+    color: #f8fafc;
+    background: #050b18;
+
+    font-family:
+        Inter,
+        Arial,
+        sans-serif;
+}
+
+
+/* =========================
+   PAGE DEV
+   ========================= */
+
+.dev-page {
+    min-height: 100vh;
+
+    display: grid;
+
+    grid-template-columns:
+        260px
+        1fr;
+}
+
+
+/* =========================
+   CONTRÔLES
+   ========================= */
+
+.dev-controls {
+    padding: 24px 20px;
+
+    border-right:
+        1px solid
+        rgba(139, 92, 246, .25);
+
+    background: #081122;
+}
+
+.dev-controls h1 {
+    margin:
+        0
+        0
+        8px;
+
+    font-size: 18px;
+}
+
+.dev-description {
+    margin-bottom: 28px;
+
+    color: #8293b3;
+
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.control-group {
+    margin-bottom: 24px;
+}
+
+.control-group label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #aab8d0;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.control-group select {
+    width: 100%;
+
+    padding: 10px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.12);
+
+    border-radius: 9px;
+
+    color: white;
+    background: #101b30;
+}
+
+.player-count-buttons {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 6px;
+}
+
+.player-count-buttons button {
+    width: 36px;
+    height: 34px;
+
+    border:
+        1px solid
+        rgba(139,92,246,.35);
+
+    border-radius: 8px;
+
+    color: #cbd5e1;
+    background: #101b30;
+
+    cursor: pointer;
+}
+
+.player-count-buttons button.active {
+    color: white;
+    background: #7048e8;
+
+    box-shadow:
+        0 0 14px
+        rgba(112,72,232,.35);
+}
+
+#timer-range {
+    width: 100%;
+}
+
+#timer-value {
+    display: block;
+
+    margin-top: 6px;
+
+    color: #facc15;
+
+    text-align: center;
+}
+
+
+/* =========================
+   PREVIEW
+   ========================= */
+
+.preview-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 30px;
+}
+
+.preview-table {
+    position: relative;
+
+    width: min(1100px, 100%);
+    height: 720px;
+
+    overflow: hidden;
+
+    border:
+        1px solid
+        rgba(105,85,255,.30);
+
+    border-radius: 34px;
+
+    background:
+        radial-gradient(
+            ellipse at center,
+            #173b66 0%,
+            #0d294b 45%,
+            #08182e 100%
+        );
+
+    box-shadow:
+        inset 0 0 90px
+        rgba(0,0,0,.30);
+}
+
+.preview-players {
+    position: absolute;
+    inset: 0;
+}
+
+
+/* =========================
+   JOUEUR
+   ========================= */
+
+.preview-player {
+    position: absolute;
+
+    width: 130px;
+
+    transform:
+        translate(-50%, -50%);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 4px;
+
+    text-align: center;
+}
+
+.preview-card-count {
+    min-width: auto;
+
+    padding: 0;
+
+    margin-left: 3px;
+
+    border-radius: 0;
+
+    color: #f8fafc;
+    background: transparent;
+
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.preview-avatar {
+    width: 64px;
+    height: 64px;
+
+    position: relative;
+
+    display: grid;
+    place-items: center;
+
+    flex-shrink: 0;
+
+    border: 2px solid
+        rgba(139, 92, 246, .75);
+
+    border-radius: 50%;
+
+    background: #071426;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 0 12px
+        rgba(124, 58, 237, .25);
+}
+
+
+.preview-avatar img {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+
+    border-radius: 50%;
+
+    user-select: none;
+    pointer-events: none;
+}
+
+.preview-player.current
+.preview-avatar {
+    border: 3px solid #facc15;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(250,204,21,.12),
+        0 0 20px
+        rgba(250,204,21,.35);
+}
+
+.preview-name-row {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    white-space: nowrap;
+
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.presence {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #65d329;
+
+    box-shadow:
+        0 0 6px
+        rgba(101,211,41,.6);
+}
+
+.owner {
+    color: #facc15;
+}
+
+.audio-button {
+    width: 20px;
+    height: 20px;
+
+    display: grid;
+    place-items: center;
+
+    padding: 0;
+
+    border:
+        1px solid
+        rgba(255,255,255,.12);
+
+    border-radius: 50%;
+
+    color: white;
+    background:
+        rgba(3,10,24,.82);
+
+    cursor: pointer;
+}
+
+
+/* =========================
+   CARTES CACHÉES
+   ========================= */
+.hidden-cards {
+    position: absolute;
+
+    width: 118px;
+    height: 90px;
+
+    top: 50%;
+
+    pointer-events: none;
+}
+
+.hidden-card {
+    position: absolute;
+
+    top: 0;
+
+    width: 58px;
+    height: 82px;
+
+    object-fit: contain;
+
+    margin: 0;
+
+    filter:
+        drop-shadow(
+            0 3px 4px
+            rgba(0, 0, 0, .35)
+        );
+}
+/* =========================
+   TIMER
+   ========================= */
+
+.turn-timer {
+    position: relative;
+
+    width: 58px;
+    height: 5px;
+
+    margin-top: 2px;
+
+    border-radius: 999px;
+
+    background:
+        rgba(255,255,255,.14);
+}
+
+.turn-timer::before {
+    content: "◷";
+
+    position: absolute;
+
+    right: calc(100% + 4px);
+    top: 50%;
+
+    transform:
+        translateY(-50%);
+    color: #facc15;
+    font-size: 10px;
+}
+
+.turn-progress {
+    height: 100%;
+
+    border-radius: inherit;
+
+    background:
+        linear-gradient(
+            90deg,
+            #facc15,
+            #f59e0b
+        );
+}
+
+
+/* =========================
+   CENTRE
+   ========================= */
+/* =========================
+   CENTRE DE LA TABLE
+   ========================= */
+
+.table-center {
+    position: absolute;
+
+    left: 50%;
+    top: 48%;
+
+    transform: translate(-50%, -50%);
+
+    width: 230px;
+    height: 200px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    pointer-events: none;
+}
+
+
+/* =========================
+   ZONE DES CARTES JOUÉES
+   ========================= */
+
+.center-play-zone {
+    position: relative;
+
+    width: 145px;
+    height: 120px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px dashed rgba(139, 92, 246, 0.45);
+    border-radius: 20px;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(139, 92, 246, 0.10) 0%,
+            rgba(59, 130, 246, 0.04) 55%,
+            transparent 75%
+        );
+
+    box-shadow:
+        inset 0 0 25px rgba(139, 92, 246, 0.08),
+        0 0 18px rgba(59, 130, 246, 0.06);
+
+    z-index: 2;
+}
+
+
+/* Carte actuellement jouée */
+
+.center-card {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 3;
+}
+
+.center-card img {
+    display: block;
+
+    width: 58px;
+    height: auto;
+
+    object-fit: contain;
+
+    filter:
+        drop-shadow(
+            0 5px 8px rgba(0, 0, 0, 0.35)
+        );
+}
+
+
+/* =========================
+   SENS DU JEU
+   ========================= */
+
+.turn-direction {
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 1;
+
+    pointer-events: none;
+}
+
+.direction-arrow {
+    position: absolute;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: directionPulse 1.4s ease-in-out infinite;
+    color: rgba(96, 165, 250, 0.80);
+
+    font-size: 19px;
+    font-weight: 900;
+
+    text-shadow:
+        0 0 8px rgba(59, 130, 246, 0.65);
+
+    opacity: 0.8;
+}
+
+.arrow-top {
+    left: 50%;
+    top: 20px;
+    transform: translateX(-50%);
+}
+
+.arrow-right {
+    right: 20px;
+    top: 50%;
+    transform:
+        translateY(-50%)
+        rotate(90deg);
+}
+
+.arrow-bottom {
+    left: 50%;
+    bottom: 20px;
+    transform:
+        translateX(-50%)
+        rotate(180deg);
+}
+
+.arrow-left {
+    left: 20px;
+    top: 50%;
+    transform:
+        translateY(-50%)
+        rotate(-90deg);
+}
+
+
+.hand-cards {
+    width: min(720px, 76vw);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 12px 30px;
+
+    overflow: visible;
+}
+
+.preview-card-image {
+    width: 58px;
+    height: 82px;
+
+    display: block;
+
+    flex: 0 0 auto;
+
+    object-fit: contain;
+
+    margin-left: -34px;
+
+    cursor: pointer;
+
+    transition:
+        transform .15s ease,
+        filter .15s ease;
+}
+
+.preview-card-image:first-child {
+    margin-left: 0;
+}
+
+.preview-card-image:hover {
+    position: relative;
+
+    z-index: 50;
+
+    transform:
+        translateY(-12px);
+
+    filter:
+        drop-shadow(
+            0 8px 8px
+            rgba(0, 0, 0, .4)
+        );
+}
+
+.preview-card-image:first-child {
+    margin-left: 0;
+}
+
+.preview-card-image:hover {
+    position: relative;
+    z-index: 20;
+
+    transform:
+        translateY(-12px);
+
+    filter:
+        drop-shadow(
+            0 8px 8px
+            rgba(0, 0, 0, .35)
+        );
+}
+
+
+
+.red {
+    color: #dc2626;
+}
+
+
+/* =========================
+   MAIN
+   ========================= */
+
+.preview-hand {
+    position: absolute;
+
+    left: 50%;
+    bottom: 125px;
+
+    transform:
+        translateX(-50%);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.hand-cards {
+    display: flex;
+}
+
+.preview-card {
+    margin-left: -24px;
+}
+
+.preview-card:first-child {
+    margin-left: 0;
+}
+
+.preview-actions {
+    position: absolute;
+
+    left: 50%;
+    bottom: -100px;
+
+    transform: translateX(-50%);
+
+    width: 700px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    z-index: 100;
+}
+
+.preview-actions button {
+    position: relative;
+    z-index: 101;
+
+    min-width: 78px;
+    padding: 8px 18px;
+
+    border: 1px solid rgba(139, 92, 246, .35);
+    border-radius: 8px;
+
+    color: white;
+    background: #111c31;
+
+    cursor: pointer;
+
+    pointer-events: auto;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 900px) {
+
+    .dev-page {
+        display: block;
+    }
+
+    .dev-controls {
+        border-right: 0;
+
+        border-bottom:
+            1px solid
+            rgba(139,92,246,.25);
+    }
+
+    .preview-area {
+        padding: 12px;
+    }
+
+    .preview-table {
+        height: 620px;
+    }
+}
+
+
+.hand-cards.two-rows {
+    display: grid;
+
+    grid-template-columns:
+        repeat(14, 30px);
+
+    grid-auto-rows: 58px;
+
+    justify-content: center;
+    align-items: start;
+
+    width: auto;
+
+    padding:
+        10px
+        40px
+        32px;
+}
+
+.hand-cards.two-rows
+.preview-card-image {
+    margin-left: 0;
+}
+
+.hand-cards.two-rows
+.preview-card-image:nth-child(n + 15) {
+    position: relative;
+
+    z-index: 10;
+}
+/* =========================
+   CARTES JOUEURS LATÉRAUX
+   ========================= */
+
+
+/* ---------- GAUCHE ---------- */
+
+.preview-player.player-left
+.hidden-cards {
+    position: absolute;
+
+    right: calc(100% + 30px);
+
+    top: 50%;
+
+    width: 58px;
+    height: 145px;
+
+    transform:
+        translateY(-50%);
+}
+
+
+.preview-player.player-left
+.hidden-card {
+    position: absolute;
+
+    left: 0;
+
+    width: 58px;
+    height: 82px;
+
+    object-fit: contain;
+
+    transform: none;
+}
+
+
+/* Empilement VERTICAL */
+
+.preview-player.player-left
+.hidden-card:nth-child(1) {
+    top: 0;
+}
+
+.preview-player.player-left
+.hidden-card:nth-child(2) {
+    top: 20px;
+}
+
+.preview-player.player-left
+.hidden-card:nth-child(3) {
+    top: 40px;
+}
+
+.preview-player.player-left
+.hidden-card:nth-child(4) {
+    top: 60px;
+}
+
+
+/* ---------- DROITE ---------- */
+
+.preview-player.player-right
+.hidden-cards {
+    position: absolute;
+
+    left: calc(100% + 30px);
+
+    top: 50%;
+
+    width: 58px;
+    height: 145px;
+
+    transform:
+        translateY(-50%);
+}
+
+
+.preview-player.player-right
+.hidden-card {
+    position: absolute;
+
+    left: 0;
+
+    width: 58px;
+    height: 82px;
+
+    object-fit: contain;
+
+    transform: none;
+}
+
+
+/* Empilement VERTICAL */
+
+.preview-player.player-right
+.hidden-card:nth-child(1) {
+    top: 0;
+}
+
+.preview-player.player-right
+.hidden-card:nth-child(2) {
+    top: 20px;
+}
+
+.preview-player.player-right
+.hidden-card:nth-child(3) {
+    top: 40px;
+}
+
+.preview-player.player-right
+.hidden-card:nth-child(4) {
+    top: 60px;
+}
+
+/* =========================================
+   JOUEUR DU HAUT
+   4 cartes horizontales contre le bord haut
+   ========================================= */
+
+.preview-player.player-top:not(.is-me)
+.hidden-cards {
+    position: absolute;
+
+    left: 50%;
+    top: auto;
+    bottom: calc(100% + 14px);
+
+    width: 210px;
+    height: 82px;
+
+    transform: translateX(-50%);
+}
+
+
+/* Les cartes sont côte à côte */
+
+.preview-player.player-top:not(.is-me)
+.hidden-card {
+    position: absolute;
+
+    top: 0;
+
+    width: 58px;
+    height: 82px;
+
+    object-fit: contain;
+
+    transform: none;
+}
+
+
+.preview-player.player-top:not(.is-me)
+.hidden-card:nth-child(1) {
+    left: 0;
+}
+
+.preview-player.player-top:not(.is-me)
+.hidden-card:nth-child(2) {
+    left: 38px;
+}
+
+.preview-player.player-top:not(.is-me)
+.hidden-card:nth-child(3) {
+    left: 76px;
+}
+
+.preview-player.player-top:not(.is-me)
+.hidden-card:nth-child(4) {
+    left: 114px;
+}
+
+.local-card-count {
+    position: fixed;
+
+    left: 50%;
+    bottom: 200px;
+
+    transform: translateX(-50%);
+
+    z-index: 50;
+
+    font-size: 13px;
+    font-weight: 900;
+
+    line-height: 1;
+}
+
+/* =========================================
+   RAPPROCHER LES JOUEURS DES BORDS
+   SANS DÉPLACER LES CARTES
+   ========================================= */
+
+/* Camila + Jaiko : vers la gauche */
+.preview-player.player-left .preview-avatar,
+.preview-player.player-left .preview-name-row,
+.preview-player.player-left .preview-card-count,
+.preview-player.player-left .turn-timer {
+    transform: translateX(-45px);
+}
+
+
+/* Mati + Kens : vers la droite */
+.preview-player.player-right .preview-avatar,
+.preview-player.player-right .preview-name-row,
+.preview-player.player-right .preview-card-count,
+.preview-player.player-right .turn-timer {
+    transform: translateX(45px);
+}
+
+.local-hand-count {
+    width: 100%;
+    margin-bottom: 2px;
+    text-align: center;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+@keyframes directionPulse {
+
+    0%,
+    100% {
+        opacity: 0.35;
+    }
+
+    50% {
+        opacity: 1;
+        text-shadow:
+            0 0 12px rgba(59, 130, 246, 0.9);
+    }
+}
+
+.arrow-top {
+    animation-delay: 0s;
+}
+
+.arrow-right {
+    animation-delay: 0.2s;
+}
+
+.arrow-bottom {
+    animation-delay: 0.4s;
+}
+
+.arrow-left {
+    animation-delay: 0.6s;
+}

@@ -1,0 +1,124 @@
+#full-profile-overlay[hidden] {
+	display: none!important
+}
+#full-profile-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 99999;
+	background: #000b;
+	display: grid;
+	place-items: center;
+	padding: 20px;
+	overflow: auto
+}
+.full-profile-card {
+	position: relative;
+	width: min(600px,100%);
+	max-height: 95vh;
+	overflow: auto;
+	background: #101c35;
+	color: #f8fafc;
+	border: 1px solid #34446a;
+	border-radius: 20px;
+	box-shadow: 0 20px 70px #0008
+}
+.full-profile-close {
+	position: absolute;
+	right: 14px;
+	top: 10px;
+	z-index: 2;
+	border: 0;
+	background: #152344;
+	color: white;
+	font-size: 28px;
+	padding: 2px 12px;
+	border-radius: 9px
+}
+.full-profile-banner {
+	height: 145px;
+background: linear-gradient(120deg,
+#7138ff,
+	#275cff);
+	background-size: cover;
+	background-position: center
+}
+.full-profile-main {
+	padding: 20px
+}
+.full-profile-avatar {
+	margin-top: -62px;
+	position: relative;
+	width: 95px;
+	height: 95px;
+	border: 4px solid #101c35;
+	border-radius: 50%;
+	background: #32476e;
+	display: grid;
+	place-items: center;
+	font-size: 38px;
+	overflow: hidden
+}
+.full-profile-avatar img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover
+}
+.full-profile-name {
+	margin: 12px 0 6px
+}
+.full-profile-bio {
+	white-space: pre-wrap;
+	color: #cbd5e1
+}
+.full-profile-meta {
+	display: flex;
+	gap: 12px;
+	flex-wrap: wrap;
+	margin: 12px 0;
+	color: #b6c7e7;
+	font-size: 14px
+}
+.full-profile-stats {
+	padding: 12px 0;
+	border-top: 1px solid #34446a
+}
+.full-profile-actions {
+	margin: 10px 0
+}
+.full-profile-edit {
+	border-top: 1px solid #34446a;
+	padding-top: 16px;
+	display: grid;
+	gap: 12px
+}
+.full-profile-edit[hidden] {
+	display: none
+}
+.full-profile-edit label {
+	display: grid;
+	gap: 5px;
+	font-size: 14px
+}
+.full-profile-edit label:has(input[type=checkbox]) {
+	display: flex;
+	align-items: center
+}
+.full-profile-edit input:not([type=checkbox]), .full-profile-edit textarea {
+	padding: 10px;
+	border-radius: 8px;
+	border: 1px solid #52618a;
+	background: #0a1428;
+	color: white;
+	max-width: 100%
+}
+.full-profile-card button {
+	padding: 9px 14px;
+	border: 0;
+	border-radius: 9px;
+	background: #6342f5;
+	color: white;
+	cursor: pointer
+}
+.full-profile-feedback {
+	color: #b9efca
+}

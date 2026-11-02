@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+{% block title %}Lobby — Game Platform{% endblock %}
+{% block content %}
+<section class="page-header">
+    <div>
+        <span class="badge">LOBBY</span>
+        <h1>Choisis ta partie</h1>
+        <p id="welcome"></p>
+    </div>
+</section>
+
+<section class="form-card" id="profile-card">
+    <h2>👤 Mon profil</h2>
+
+    <div class="profile-avatar-section">
+        <div id="profile-avatar-preview" class="profile-avatar-preview">
+            ?
+        </div>
+
+        <div class="profile-avatar-actions">
+            <strong id="profile-username"></strong>
+
+            <input
+                type="file"
+                id="profile-avatar-input"
+                accept="image/jpeg,image/png,image/webp"
+                hidden
+            >
+
+            <button
+                type="button"
+                class="button secondary small"
+                id="profile-avatar-choose"
+            >
+                Choisir une photo
+            </button>
+
+            <button
+                type="button"
+                class="button small"
+                id="profile-avatar-save"
+                disabled
+            >
+                Enregistrer la photo
+            </button>
+
+            <p id="profile-avatar-status" role="status"></p>
+        </div>
+    </div>
+</section>
+
+<div class="two-columns">
+
+<section class="rooms-section">
+    <div class="section-title">
+        <h2>Salles ouvertes</h2>
+        <button class="button secondary small" id="refresh-btn">Actualiser</button>
+    </div>
+    <div id="rooms" class="room-list"></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+requireAuth();
+
+async function loadLobby() {
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    document.getElementById("welcome").textContent =
+        user ? `Bienvenue ${user.username}.` : "";
+
+    const result = await api("/api/rooms");
+    const container = document.getElementById("rooms");
+    container.innerHTML = "";
+
+    if (!result.ok) return;
+
+    if (!result.data.rooms.length) {
+        container.innerHTML = '<div class="empty">Aucune salle ouverte.</div>';
+        return;
+    }
+
+    for (const room of result.data.rooms) {
+        const card = document.createElement("article");
+        card.className = "room-card";
+        card.innerHTML = `
+            <div>
+                <strong>${escapeHtml(room.game_type)}</strong>
+                <span class="room-code">${escapeHtml(room.code)}</span>
+            </div>
+            <div>
+                <span>${room.status}</span>
+                <button class="button small" onclick="joinRoom('${room.code}')">Rejoindre</button>
+            </div>`;
+        container.appendChild(card);
+    }
+}
+
+async function joinRoom(code) {
+    const result = await api(`/api/rooms/${encodeURIComponent(code)}/join`, {
+        method: "POST",
+        body: { role: "PLAYER" }
+    });
+    if (result.ok) location.href = `/room/${encodeURIComponent(code)}`;
+}
+
+document.getElementById("create-room-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const result = await api("/api/rooms", {
+        method: "POST",
+        body: {
+            game_type: document.getElementById("game_type").value,
+            max_players: Number(document.getElementById("max_players").value)
+        }
+    });
+    if (result.ok) location.href = `/room/${result.data.room.code}`;
+});
+
+document.getElementById("join-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const code = document.getElementById("room-code").value.trim().toUpperCase();
+    const role = document.getElementById("join-role").value;
+    const result = await api(`/api/rooms/${encodeURIComponent(code)}/join`, {
+        method: "POST",
+        body: { role }
+    });
+    if (result.ok) location.href = `/room/${encodeURIComponent(code)}`;
+});
+
+// =====================================
+// PHOTO DE PROFIL
+// =====================================
+
+const avatarInput = document.getElementById("profile-avatar-input");
+const avatarPreview = document.getElementById("profile-avatar-preview");
+const avatarSave = document.getElementById("profile-avatar-save");
+const avatarStatus = document.getElementById("profile-avatar-status");
+
+let selectedAvatar = null;
+
+function displayProfileAvatar(url, username) {
+    avatarPreview.replaceChildren();
+
+    const initial = (username || "?").trim().charAt(0).toUpperCase();
+
+    if (!url) {
+        avatarPreview.textContent = initial;
+        return;
+    }
+
+    const img = document.createElement("img");
+    img.alt = "Photo de profil";
+    img.src = url;
+
+    img.onerror = () => {
+        avatarPreview.textContent = initial;
+    };
+
+    avatarPreview.appendChild(img);
+}
+
+function initProfileAvatar() {
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+
+    if (!user) return;
+
+    document.getElementById("profile-username").textContent = user.username;
+    displayProfileAvatar(user.avatar_url, user.username);
+}
+
+document.getElementById("profile-avatar-choose").addEventListener("click", () => {
+    avatarInput.click();
+});
+
+avatarInput.addEventListener("change", () => {
+    const file = avatarInput.files[0];
+
+    if (!file) return;
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+    if (!allowedTypes.includes(file.type) || file.size > 5 * 1024 * 1024) {
+        avatarStatus.textContent = "Choisis une image JPG, PNG ou WEBP de 5 Mo maximum.";
+        avatarSave.disabled = true;
+        selectedAvatar = null;
+        return;
+    }
+
+    selectedAvatar = file;
+    avatarSave.disabled = false;
+    avatarStatus.textContent = "Photo prête à être enregistrée.";
+
+    const previewUrl = URL.createObjectURL(file);
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+
+    displayProfileAvatar(previewUrl, user?.username);
+
+    // L'image a été chargée dans l'élément img.
+    const img = avatarPreview.querySelector("img");
+    if (img) {
+        img.addEventListener("load", () => URL.revokeObjectURL(previewUrl), {
+            once: true
+        });
+    }
+});
+
+avatarSave.addEventListener("click", async () => {
+    if (!selectedAvatar) return;
+
+    avatarSave.disabled = true;
+    avatarStatus.textContent = "Enregistrement en cours...";
+
+    const formData = new FormData();
+    formData.append("avatar", selectedAvatar);
+
+    try {
+        const token = localStorage.getItem("access_token");
+
+        const response = await fetch("/api/auth/avatar", {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Impossible d'enregistrer la photo.");
+        }
+
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        displayProfileAvatar(data.user.avatar_url, data.user.username);
+
+        selectedAvatar = null;
+        avatarStatus.textContent = "Photo de profil enregistrée !";
+
+    } catch (error) {
+        avatarStatus.textContent = error.message;
+        avatarSave.disabled = false;
+    }
+});
+
+initProfileAvatar();
+document.getElementById("refresh-btn").addEventListener("click", loadLobby);
+loadLobby();
+</script>
+{% endblock %}

@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+
+{% block title %}
+Salle {{ code }} — Game Platform
+{% endblock %}
+
+
+{% block head %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/room.css') }}"
+>
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/games/president.css') }}"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="room-page">
+
+    <div class="room-container">
+
+        <header class="room-header">
+
+            <div class="room-header-left">
+
+                <a
+                    href="/lobby"
+                    class="room-back">
+                    ←
+                </a>
+
+                <div class="room-title-block">
+
+                    <span class="game-badge">
+                        👑 PRESIDENT
+                    </span>
+
+                    <h1 id="room-title">
+                        Salle {{ code }}
+                    </h1>
+
+                    <p id="room-info">
+                        Chargement du salon...
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="room-code">
+                Code :
+                <strong>{{ code }}</strong>
+            </div>
+
+        </header>
+
+
+        <div class="room-grid">
+
+            <main class="room-main">
+
+
+                <!-- SALLE D'ATTENTE -->
+
+                <section
+                    id="waiting-panel"
+                    class="room-card waiting-panel">
+
+                    <div class="waiting-icon">
+                        👑
+                    </div>
+
+                    <h2>
+                        En attente des joueurs
+                    </h2>
+
+                    <p class="waiting-subtitle">
+                        Invite un ami à rejoindre
+                        la salle {{ code }}
+                    </p>
+                    <div
+                        id="room-expiration"
+                        class="room-expiration"
+                    >
+                        <div class="room-expiration-info">
+
+                            <span>
+                                ⏱ Cette salle expire dans
+                            </span>
+
+                            <strong id="room-time-left">
+                                --
+                            </strong>
+
+                        </div>
+
+                        <div class="room-timeout-track">
+
+                            <div
+                                id="room-timeout-progress"
+                                class="room-timeout-progress"
+                            ></div>
+
+                        </div>
+                    </div>
+
+
+                    <div
+                        id="members"
+                        class="members-list">
+                    </div>
+
+
+                    <button
+                        id="start-btn"
+                        class="start-button"
+                        type="button"
+                        disabled>
+
+                        Démarrer la partie
+
+                    </button>
+
+
+                    <p class="waiting-help">
+                        Il faut au moins 2 joueurs
+                        pour commencer.
+                    </p>
+
+                </section>
+
+
+                <!-- PRESIDENT -->
+
+                <!-- PRESIDENT -->
+
+<!-- PRESIDENT -->
+
+<section
+    id="game-panel"
+    class="room-card game-panel hidden">
+
+    <!--
+        Éléments techniques conservés pour president.js,
+        mais masqués visuellement.
+    -->
+    <div class="president-hidden-ui" aria-hidden="true">
+        <p id="turn-info"></p>
+
+        <div
+            id="results"
+            class="results">
+        </div>
+
+        <span id="hand-count">
+            0 carte
+        </span>
+
+        <span id="selected-count">
+            0 sélectionnée
+        </span>
+    </div>
+
+
+    <!-- TABLE DE JEU COMPLÈTE -->
+
+    <div class="game-table president-table">
+
+        <!-- JOUEURS AUTOUR DE LA TABLE -->
+
+        <div
+            id="players"
+            class="president-table-players">
+        </div>
+
+
+        <!-- CENTRE / DERNIER PLI -->
+
+        <div class="president-table-center">
+
+            <span class="table-center-label">
+                Dernier pli
+            </span>
+
+            <div
+                id="current-play"
+                class="played-cards">
+            </div>
+
+        </div>
+
+
+        <!-- MAIN DU JOUEUR -->
+
+        <div class="president-local-hand">
+
+            <div
+                id="hand"
+                class="hand">
+            </div>
+
+
+            <div class="game-actions president-hand-actions">
+
+                <button
+                    id="play-btn"
+                    class="game-action primary"
+                    type="button">
+
+                    Jouer
+
+                </button>
+
+
+                <button
+                    id="pass-btn"
+                    class="game-action"
+                    type="button">
+
+                    Passer
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!--
+        On garde le bouton fonctionnel pour l'instant.
+        On le repositionnera ensuite.
+    -->
+
+    <button
+        id="leave-btn"
+        class="game-action president-leave-button"
+        type="button">
+
+        Quitter
+
+    </button>
+
+</section>
+
+            </main>
+
+
+            <!-- CHAT -->
+
+            <aside class="room-sidebar">
+
+                <section
+                    id="chat-panel"
+                    class="room-card room-chat">
+
+                    <div class="chat-header">
+
+                        <h3>
+                            💬 Chat de la salle
+                        </h3>
+
+                    </div>
+
+
+                    <div
+                        id="chat-messages"
+                        class="chat-messages">
+
+                        <div class="chat-empty">
+                            Aucun message pour le moment.
+                        </div>
+
+                    </div>
+
+
+                    <form
+                        id="chat-form"
+                        class="chat-form">
+
+                        <input
+                            id="chat-input"
+                            type="text"
+                            maxlength="500"
+                            placeholder="Écrire un message..."
+                            autocomplete="off"
+                        >
+
+                        <button
+                            class="chat-send"
+                            type="submit"
+                            aria-label="Envoyer">
+
+                            ➤
+
+                        </button>
+
+                    </form>
+
+                </section>
+
+            </aside>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script
+    src="https://cdn.socket.io/4.8.1/socket.io.min.js">
+</script>
+
+<script
+    src="{{ url_for('static', filename='js/socket.js') }}">
+</script>
+
+
+<script>
+    requireAuth();
+
+    const roomCode = {{ code|tojson }};
+</script>
+
+
+<script
+    src="{{ url_for('static', filename='js/room.js') }}">
+</script>
+
+<script
+    src="{{ url_for('static', filename='js/games/president.js') }}">
+</script>
+
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+            console.log(
+                "Initialisation salle:",
+                roomCode
+            );
+
+        initRoom();
+
+        initPresidentGame();
+
+
+        window.gameSocket =
+            connectGameSocket(
+                roomCode,
+                renderPresidentState,
+                renderRoomUpdate,
+                renderChatMessage,
+                renderChatHistory
+            );
+
+         console.log(
+                "Socket créé:",
+                window.gameSocket
+            );
+
+    }
+);
+
+</script>
+
+{% endblock %}

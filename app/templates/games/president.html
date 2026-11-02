@@ -1,0 +1,129 @@
+<section
+    id="game-panel"
+    class="room-card game-panel hidden"
+>
+
+    <!-- Éléments techniques nécessaires à president.js -->
+    <div class="president-hidden-ui" aria-hidden="true">
+
+        <p id="turn-info"></p>
+
+        <div
+            id="results"
+            class="results">
+        </div>
+
+        <span id="hand-count">
+            0 carte
+        </span>
+
+        <span id="selected-count">
+            0 sélectionnée
+        </span>
+
+    </div>
+
+<!-- Menu de salle : interface visuelle, actions audio à raccorder au moteur JS -->
+    <div class="president-room-menu">
+      <button type="button" class="president-menu-trigger" aria-label="Options de la salle" aria-expanded="false" aria-controls="president-menu-list">⋮</button>
+      <div class="president-menu-list" id="president-menu-list" hidden>
+        <button type="button" data-president-option="invite">Inviter un ami</button>
+        <button type="button" data-president-option="music" aria-pressed="false">Musique de fond : activée</button>
+        <button type="button" data-president-option="cards" aria-pressed="false">Sons des cartes : activés</button>
+      </div>
+    </div>
+    <!-- Podium royal : alimenté par le véritable état de la partie. -->
+<div class="president-royal-layout">
+  <aside class="president-royal-podium" aria-label="Classement des joueurs">
+    <div class="president-podium-list" id="president-royal-podium" aria-live="polite"></div>
+  </aside>
+<!-- TABLE PRESIDENT -->
+   <div class="game-table president-table">
+
+        <!-- Décor : ne capte aucun clic -->
+        <div class="president-royal-art" aria-hidden="true">
+          <div class="president-royal-orbit"></div>
+          <svg class="president-royal-arrows" viewBox="0 0 800 470" preserveAspectRatio="xMidYMid meet">
+            <defs><linearGradient id="royalGold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff5c1"/><stop offset=".45" stop-color="#ffc45c"/><stop offset="1" stop-color="#c37a18"/></linearGradient></defs>
+            <path d="M 170 250 A 235 180 0 0 1 590 150" fill="none" stroke="url(#royalGold)" stroke-width="11" stroke-linecap="round"/>
+            <path d="M 555 142 L 609 146 L 587 192 Z" fill="url(#royalGold)"/>
+            <path d="M 630 220 A 235 180 0 0 1 210 320" fill="none" stroke="url(#royalGold)" stroke-width="11" stroke-linecap="round"/>
+            <path d="M 245 328 L 191 324 L 213 278 Z" fill="url(#royalGold)"/>
+          </svg>
+          <div class="president-royal-emblem"><span>♛</span><small>PRESIDENT</small></div>
+        </div>
+        <!-- JOUEURS -->
+
+        <div
+            id="players"
+            class="president-table-players">
+        </div>
+        <!-- CENTRE -->
+        <div class="president-table-center">
+            <span class="table-center-label">Derniers coups</span>
+            <div id="president-last-plays" class="president-last-plays" aria-label="Trois derniers coups joués"></div>
+        </div>
+        <div
+            id="current-play"
+            class="played-cards">
+        </div>
+
+        <!-- MAIN DU JOUEUR -->
+        <div class="president-local-hand">
+            <div id="hand" class="hand"></div>
+            <div class="game-actions president-hand-actions">
+                <button id="pass-btn" class="president-icon-action president-pass-action"
+                        type="button" aria-label="Passer" title="Passer" disabled>
+                    <img src="{{ url_for('static', filename='images/president/pass.png') }}" alt="" draggable="false">
+                </button>
+                <button id="play-btn" class="president-icon-action president-play-action"
+                        type="button" aria-label="Jouer" title="Jouer" disabled>
+                    <img src="{{ url_for('static', filename='images/president/play.png') }}" alt="" draggable="false">
+                </button>
+            </div>
+        </div>
+    </div>
+   <button id="leave-btn" class="game-action president-leave-button" type="button" aria-label="Quitter la salle" title="Quitter la salle">Quitter</button>
+</section>
+<script>
+/* Menu visuel isolé : aucun changement des événements du jeu. */
+(() => {
+  const panel = document.getElementById('game-panel');
+  if (!panel || panel.dataset.royalMenuReady) return;
+  panel.dataset.royalMenuReady = '1';
+  const trigger = panel.querySelector('.president-menu-trigger');
+  const menu = panel.querySelector('.president-menu-list');
+  trigger.addEventListener('click', () => {
+    menu.hidden = !menu.hidden;
+    trigger.setAttribute('aria-expanded', String(!menu.hidden));
+  });
+  document.addEventListener('click', event => {
+    if (!event.target.closest('.president-room-menu')) {
+      menu.hidden = true;
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+  });
+  menu.addEventListener('click', async event => {
+    const option = event.target.closest('[data-president-option]');
+    if (!option) return;
+    if (option.dataset.presidentOption === 'invite') {
+      try {
+        await navigator.clipboard.writeText(location.href);
+        option.textContent = 'Lien de la salle copié ✓';
+      } catch (_) {
+        window.prompt('Copier le lien de la salle :', location.href);
+      }
+      return;
+    }
+    /* Les réglages sont transmis au code audio du site via cet événement. */
+    const muted = option.getAttribute('aria-pressed') !== 'true';
+    option.setAttribute('aria-pressed', String(muted));
+    option.textContent = option.dataset.presidentOption === 'music'
+      ? `Musique de fond : ${muted ? 'coupée' : 'activée'}`
+      : `Sons des cartes : ${muted ? 'coupés' : 'activés'}`;
+    document.dispatchEvent(new CustomEvent('president:audio-preference', {
+      detail: { category: option.dataset.presidentOption, muted }
+    }));
+  });
+})();
+</script>

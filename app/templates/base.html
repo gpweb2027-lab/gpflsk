@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>
+        {% block title %}Game Platform{% endblock %}
+    </title>
+
+    <!-- CSS général -->
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <!-- CSS spécifique à chaque page -->
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- Contenu de la page -->
+    {% block content %}{% endblock %}
+
+
+    <!-- Notifications -->
+    <div
+        id="toast"
+        class="toast hidden">
+    </div>
+
+
+    <!-- Socket.IO -->
+    <script
+        src="https://cdn.socket.io/4.8.1/socket.io.min.js">
+    </script>
+
+
+    <!-- Fonctions globales :
+         api()
+         showToast()
+         requireAuth()
+    -->
+    <script
+        src="{{ url_for('static', filename='js/app.js') }}">
+    </script>
+
+
+    <!-- JS spécifique à chaque page -->
+    {% block scripts %}{% endblock %}
+
+</body>
+
+</html>

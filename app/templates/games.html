@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="games-page">
+
+    <header class="games-page-header">
+
+        <div>
+            <span class="badge">
+                🎮 JEUX
+            </span>
+
+            <h1>Choisis ton jeu</h1>
+
+            <p>
+                Rejoins une partie existante
+                ou crée ton propre salon.
+            </p>
+        </div>
+
+        <a
+            href="/lobby"
+            class="secondary">
+            ← Accueil
+        </a>
+
+    </header>
+
+
+    <section class="games-catalog">
+
+        {% for game in games %}
+
+        <article class="game-catalog-card">
+
+            <div class="game-catalog-icon">
+                {{ game.emoji }}
+            </div>
+
+            <div class="game-catalog-content">
+
+                <h2>{{ game.name }}</h2>
+
+                <p>
+                    {{ game.description }}
+                </p>
+
+                <div class="game-meta">
+
+                    <span>
+                        👥
+                        {{ game.min_players }}
+                        -
+                        {{ game.max_players }}
+                        joueurs
+                    </span>
+
+                    <span>
+                        ⏱ {{ game.turn_timeout }} s
+                        par tour
+                    </span>
+
+                </div>
+
+                {% if game.enabled %}
+
+                <a
+                    href="/games/{{ game.slug }}"
+                    class="play-button">
+
+                    Voir les parties →
+
+                </a>
+
+                {% else %}
+
+                <button
+                    class="play-button disabled"
+                    disabled>
+
+                    🔒 Bientôt disponible
+
+                </button>
+
+                {% endif %}
+
+            </div>
+
+        </article>
+
+        {% endfor %}
+
+    </section>
+
+</div>
+
+{% endblock %}

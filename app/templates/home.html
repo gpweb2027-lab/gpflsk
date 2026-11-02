@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Game Platform — Joue, discute et apprends</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/home.css') }}">
+</head>
+
+<body>
+
+<header class="home-header">
+
+    <a href="/" class="brand">
+        <span class="brand-icon">🎮</span>
+        <span>Game Platform</span>
+    </a>
+
+    <nav class="home-nav">
+        <a href="#games">Jeux</a>
+        <a href="#languages">Langues</a>
+        <a href="#community">Communauté</a>
+    </nav>
+
+    <div class="header-actions">
+
+        <button class="language-selector">
+            🇫🇷
+            <span>FR</span>
+            <span class="arrow">⌄</span>
+        </button>
+
+        <a id="login-link"
+           href="/login"
+           class="login-link">
+            Se connecter
+        </a>
+
+        <a id="register-link"
+           href="/register"
+           class="register-button">
+            Créer un compte
+        </a>
+
+        <a id="dashboard-link"
+           href="/lobby"
+           class="register-button hidden">
+            Mon espace
+        </a>
+
+    </div>
+
+</header>
+
+
+<main>
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+        <div class="hero-glow glow-one"></div>
+        <div class="hero-glow glow-two"></div>
+
+        <div class="hero-content">
+
+            <div class="hero-badge">
+                <span></span>
+                COMMUNAUTÉ MULTIJOUEUR
+            </div>
+
+            <h1>
+                Joue, discute<br>
+                et <span>apprends ensemble.</span>
+            </h1>
+
+            <p class="hero-description">
+                Des jeux multijoueurs et un espace d'échange
+                linguistique pour rencontrer des personnes
+                du monde entier.
+            </p>
+
+            <div class="hero-actions">
+
+                <a href="/register"
+                   class="button button-primary">
+                    Créer un compte gratuitement
+                    <span>→</span>
+                </a>
+
+                <a href="/login"
+                   class="button button-secondary">
+                    Se connecter
+                </a>
+
+            </div>
+
+            <div class="hero-benefits">
+
+                <div>
+                    <span class="check">✓</span>
+                    Gratuit pour commencer
+                </div>
+
+                <div>
+                    <span class="check">✓</span>
+                    Communauté internationale
+                </div>
+
+                <div>
+                    <span class="check">✓</span>
+                    Jeux & langues
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="hero-visual">
+
+            <div class="world">
+
+                <div class="world-glow"></div>
+
+                <div class="globe">
+                    🌍
+                </div>
+
+                <div class="orbit orbit-one"></div>
+                <div class="orbit orbit-two"></div>
+
+            </div>
+
+
+            <div class="language-bubble bubble-en">
+                <span>🇬🇧</span>
+                <div>
+                    <small>English</small>
+                    <strong>Hello!</strong>
+                </div>
+            </div>
+
+            <div class="language-bubble bubble-fr">
+                <span>🇫🇷</span>
+                <div>
+                    <small>Français</small>
+                    <strong>Bonjour !</strong>
+                </div>
+            </div>
+
+            <div class="language-bubble bubble-es">
+                <span>🇪🇸</span>
+                <div>
+                    <small>Español</small>
+                    <strong>¡Hola!</strong>
+                </div>
+            </div>
+
+            <div class="language-bubble bubble-de">
+                <span>🇩🇪</span>
+                <div>
+                    <small>Deutsch</small>
+                    <strong>Hallo!</strong>
+                </div>
+            </div>
+
+            <div class="player player-one">👩🏻</div>
+            <div class="player player-two">👨🏽</div>
+            <div class="player player-three">👩🏼</div>
+            <div class="player player-four">👨🏻</div>
+
+        </div>
+
+    </section>
+
+
+    <!-- STATISTIQUES -->
+
+    <section class="community-stats">
+
+        <div class="stat">
+            <strong>10K+</strong>
+            <span>Joueurs</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="stat">
+            <strong>4</strong>
+            <span>Langues</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="stat">
+            <strong>24/7</strong>
+            <span>Communauté</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="stat">
+            <strong>∞</strong>
+            <span>Rencontres</span>
+        </div>
+
+    </section>
+
+
+    <!-- JEUX -->
+
+    <section id="games" class="section">
+
+        <div class="section-heading">
+
+            <div>
+                <span class="section-label">
+                    🎮 JEUX MULTIJOUEURS
+                </span>
+
+                <h2>
+                    Joue avec des personnes<br>
+                    <span>du monde entier.</span>
+                </h2>
+            </div>
+
+            <p>
+                Crée une partie, invite tes amis ou rejoins
+                un salon public en quelques secondes.
+            </p>
+
+        </div>
+
+
+        <div class="games-grid">
+
+            <article class="game-card">
+
+                <div class="game-picture president">
+                    <span>👑</span>
+
+                    <div class="available">
+                        ● Disponible
+                    </div>
+                </div>
+
+                <div class="game-info">
+                    <h3>President</h3>
+
+                    <p>
+                        Débarrasse-toi de tes cartes avant
+                        tous les autres joueurs.
+                    </p>
+
+                    <div>
+                        <span>👥 2 - 8 joueurs</span>
+                        <strong>Jouer →</strong>
+                    </div>
+                </div>
+
+            </article>
+
+
+            <article class="game-card">
+
+                <div class="game-picture uno">
+                    <span>🃏</span>
+
+                    <div class="available">
+                        ● Disponible
+                    </div>
+                </div>
+
+                <div class="game-info">
+                    <h3>UNO</h3>
+
+                    <p>
+                        Le célèbre jeu de cartes,
+                        rapide et amusant entre amis.
+                    </p>
+
+                    <div>
+                        <span>👥 2 - 10 joueurs</span>
+                        <strong>Jouer →</strong>
+                    </div>
+                </div>
+
+            </article>
+
+
+            <article class="game-card">
+
+                <div class="game-picture chess">
+                    <span>♟️</span>
+
+                    <div class="soon">
+                        Bientôt
+                    </div>
+                </div>
+
+                <div class="game-info">
+                    <h3>Échecs</h3>
+
+                    <p>
+                        Défie d'autres joueurs dans
+                        le célèbre jeu de stratégie.
+                    </p>
+
+                    <div>
+                        <span>👥 2 joueurs</span>
+                        <strong class="muted">Bientôt</strong>
+                    </div>
+                </div>
+
+            </article>
+
+
+            <article class="game-card">
+
+                <div class="game-picture poker">
+                    <span>♠️</span>
+
+                    <div class="soon">
+                        Bientôt
+                    </div>
+                </div>
+
+                <div class="game-info">
+                    <h3>Poker</h3>
+
+                    <p>
+                        Bluffe, mise et affronte tes
+                        amis autour de la table.
+                    </p>
+
+                    <div>
+                        <span>👥 2 - 8 joueurs</span>
+                        <strong class="muted">Bientôt</strong>
+                    </div>
+                </div>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- LANGUES -->
+
+    <section id="languages" class="language-section">
+
+        <div class="language-copy">
+
+            <span class="section-label">
+                🌍 ÉCHANGE LINGUISTIQUE
+            </span>
+
+            <h2>
+                Apprends une langue<br>
+                <span>en la pratiquant.</span>
+            </h2>
+
+            <p>
+                Rejoins des salons de discussion, rencontre
+                des locuteurs natifs et améliore ton niveau
+                naturellement en discutant et en jouant.
+            </p>
+
+            <div class="feature-list">
+
+                <div>
+                    <span>💬</span>
+
+                    <div>
+                        <strong>Salons de discussion</strong>
+                        <p>Discute avec des personnes du monde entier.</p>
+                    </div>
+                </div>
+
+                <div>
+                    <span>🤝</span>
+
+                    <div>
+                        <strong>Échanges linguistiques</strong>
+                        <p>Aide quelqu'un et apprends sa langue en retour.</p>
+                    </div>
+                </div>
+
+                <div>
+                    <span>🎮</span>
+
+                    <div>
+                        <strong>Apprends en jouant</strong>
+                        <p>Pratique sans avoir l'impression d'étudier.</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <a href="/register"
+               class="button button-primary">
+                Commencer gratuitement →
+            </a>
+
+        </div>
+
+
+        <div class="language-cards">
+
+            <div class="language-card">
+                <span class="language-flag">🇬🇧</span>
+                <div>
+                    <small>APPRENDS</small>
+                    <strong>English</strong>
+                    <p>Hello, how are you?</p>
+                </div>
+            </div>
+
+            <div class="language-card">
+                <span class="language-flag">🇩🇪</span>
+                <div>
+                    <small>LERNE</small>
+                    <strong>Deutsch</strong>
+                    <p>Hallo, wie geht's?</p>
+                </div>
+            </div>
+
+            <div class="language-card">
+                <span class="language-flag">🇫🇷</span>
+                <div>
+                    <small>APPRENDS</small>
+                    <strong>Français</strong>
+                    <p>Bonjour, comment ça va ?</p>
+                </div>
+            </div>
+
+            <div class="language-card">
+                <span class="language-flag">🇪🇸</span>
+                <div>
+                    <small>APRENDE</small>
+                    <strong>Español</strong>
+                    <p>¡Hola! ¿Cómo estás?</p>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- COMMUNAUTÉ -->
+
+    <section id="community" class="community-section">
+
+        <span class="section-label">
+            👥 UNE SEULE COMMUNAUTÉ
+        </span>
+
+        <h2>
+            Plus qu'une plateforme de jeux.
+        </h2>
+
+        <p class="community-description">
+            Fais des rencontres, joue et progresse
+            avec une communauté internationale.
+        </p>
+
+
+        <div class="community-grid">
+
+            <article>
+                <span>🎮</span>
+                <h3>Joue</h3>
+                <p>
+                    Rejoins des parties multijoueurs
+                    avec tes amis ou de nouvelles personnes.
+                </p>
+            </article>
+
+            <article>
+                <span>💬</span>
+                <h3>Discute</h3>
+                <p>
+                    Utilise les chats et salons pour
+                    échanger avec la communauté.
+                </p>
+            </article>
+
+            <article>
+                <span>🎓</span>
+                <h3>Apprends</h3>
+                <p>
+                    Améliore ton anglais, allemand,
+                    français ou espagnol.
+                </p>
+            </article>
+
+            <article>
+                <span>🌍</span>
+                <h3>Rencontre</h3>
+                <p>
+                    Découvre des personnes et des
+                    cultures du monde entier.
+                </p>
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- CTA -->
+
+    <section class="final-cta">
+
+        <div class="cta-glow"></div>
+
+        <span>🎮</span>
+
+        <h2>
+            Prêt à rejoindre la partie ?
+        </h2>
+
+        <p>
+            Crée ton compte gratuitement et commence
+            à jouer, discuter et apprendre.
+        </p>
+
+        <a href="/register"
+           class="button button-primary">
+            Créer mon compte gratuitement →
+        </a>
+
+        <small>
+            Aucun moyen de paiement requis.
+        </small>
+
+    </section>
+
+</main>
+
+
+<footer>
+
+    <a href="/" class="brand">
+        <span class="brand-icon">🎮</span>
+        Game Platform
+    </a>
+
+    <p>
+        Joue. Discute. Apprends.
+    </p>
+
+    <div>
+        <a href="#">Conditions</a>
+        <a href="#">Confidentialité</a>
+        <a href="#">Contact</a>
+    </div>
+
+</footer>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+        const token = localStorage.getItem("access_token");
+
+        if (!token) {
+            return;
+        }
+
+        const login = document.getElementById("login-link");
+        const register = document.getElementById("register-link");
+        const dashboard = document.getElementById("dashboard-link");
+
+        login?.classList.add("hidden");
+        register?.classList.add("hidden");
+        dashboard?.classList.remove("hidden");
+    });
+</script>
+
+</body>
+</html>
