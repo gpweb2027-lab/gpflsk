@@ -33,6 +33,7 @@ def register():
         }, 400
 
     username = data.get("username")
+    pseudo = (data.get("pseudo") or "").strip()
     email = data.get("email")
     password = data.get("password")
 
@@ -76,6 +77,7 @@ def register():
 
     user = User(
         username=username,
+        pseudo=pseudo[:50] or username,
         email=email,
         password_hash=password_hash
     )
@@ -101,6 +103,7 @@ def login():
         }, 400
 
     username = data.get("username")
+    pseudo = (data.get("pseudo") or "").strip()
     password = data.get("password")
 
     if not username or not password:
@@ -208,3 +211,51 @@ def upload_avatar():
         current_app.logger.exception("Échec de l'enregistrement de l'avatar")
         return {"error": "Impossible d'enregistrer la photo"}, 500
     return {"message": "Photo mise à jour", "user": user.to_dict()}, 200
+
+@auth_bp.post("/banner")
+@jwt_required()
+def upload_banner():
+    """Enregistre la bannière du profil et renvoie toujours du JSON."""
+    from pathlib import Path
+    from uuid import uuid4
+    from flask import current_app
+
+    user = db.session.get(User, int(get_jwt_identity()))
+    if user is None:
+        return {"error": "Utilisateur introuvable"}, 404
+
+    uploaded = request.files.get("banner")
+    if uploaded is None or not uploaded.filename:
+        return {"error": "Sélectionne une bannière"}, 400
+
+    raw = uploaded.read(5 * 1024 * 1024 + 1)
+    if not raw or len(raw) > 5 * 1024 * 1024:
+        return {"error": "Image vide ou supérieure à 5 Mo"}, 400
+
+    if raw.startswith(b"\xff\xd8\xff"):
+        ext = "jpg"
+    elif raw.startswith(b"\x89PNG\r\n\x1a\n"):
+        ext = "png"
+    elif raw.startswith(b"RIFF") and raw[8:12] == b"WEBP":
+        ext = "webp"
+    else:
+        return {"error": "Format invalide : JPG, PNG ou WEBP uniquement"}, 400
+
+    if not current_app.static_folder:
+        return {"error": "Dossier static introuvable"}, 500
+
+    directory = Path(current_app.static_folder) / "uploads" / "banners"
+    filename = f"{uuid4().hex}.{ext}"
+    path = directory / filename
+    try:
+        directory.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(raw)
+        user.banner_url = f"/static/uploads/banners/{filename}"
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        path.unlink(missing_ok=True)
+        current_app.logger.exception("Échec de l'enregistrement de la bannière")
+        return {"error": "Impossible d'enregistrer la bannière"}, 500
+
+    return {"message": "Bannière mise à jour", "banner_url": user.banner_url}, 200

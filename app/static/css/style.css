@@ -2427,3 +2427,184 @@ a {
 #group-chat-modal #group-chat-form input {flex:1;min-width:0;width:auto;border-radius:22px;background:#25272c;border:1px solid #338dea;color:#fff;padding:12px 15px;font-size:14px}
 #group-chat-modal #group-chat-form button {flex:0 0 auto;border-radius:22px;background:#2189ef;color:#fff;padding:12px 18px}
 @media(max-width:600px){#group-chat-modal .group-chat-dialog{width:100%;height:min(94dvh,780px)}#group-chat-modal #group-chat-messages .group-chat-content{max-width:calc(100% - 43px)}#group-chat-modal #group-chat-messages .group-chat-avatar{flex-basis:28px;width:28px;height:28px;min-width:28px;max-width:28px}}
+
+
+/* ===== Navigation mobile du dashboard : le PC reste inchangÃ© ===== */
+.mobile-bottom-nav,.mobile-social-heading,.mobile-social-tabs { display:none; }
+@media (max-width:760px) {
+  body { padding-bottom:calc(74px + env(safe-area-inset-bottom,0px)); }
+  .mobile-bottom-nav {
+    position:fixed; bottom:0; left:0; right:0; z-index:900;
+    display:flex; align-items:stretch; justify-content:space-around;
+    height:calc(66px + env(safe-area-inset-bottom,0px));
+    padding:5px 12px calc(5px + env(safe-area-inset-bottom,0px));
+    background:#0b1428; border-top:1px solid rgba(148,163,184,.22);
+    box-shadow:0 -8px 28px #0005;
+  }
+  .mobile-nav-button { position:relative; display:flex; flex:1; flex-direction:column;
+    align-items:center; justify-content:center; gap:2px; border:0; border-radius:14px;
+    color:#9caecb; background:transparent; font-weight:700; }
+  .mobile-nav-button span { font-size:25px; line-height:1; }
+  .mobile-nav-button small { font-size:11px; }
+  .mobile-nav-button.is-active { color:#fff; background:linear-gradient(110deg,#7138ff,#275cff); }
+  #mobile-social-notice:not([hidden]) { position:absolute; right:25%; top:7px;
+    width:8px; height:8px; border-radius:50%; background:#ff5368; }
+  .app-layout { display:flex !important; flex-direction:column; min-width:0; }
+  .app-layout > .main-content, .app-layout > .activity-sidebar,
+  .app-layout > .lobby-social-column { display:none !important; }
+  body[data-mobile-view="home"] .app-layout > .main-content { display:block !important; }
+  body[data-mobile-view="activity"] .app-layout > .activity-sidebar { display:flex !important; }
+  body[data-mobile-view="social"] .app-layout > .lobby-social-column { display:flex !important; }
+  .app-layout > .lobby-social-column { width:100%; padding:14px 12px 24px !important; border:0;
+    flex-direction:column; gap:12px; min-height:calc(100dvh - 155px); }
+  .mobile-social-heading { display:block; text-align:center; padding:8px 0 12px; }
+  .mobile-social-heading h2 { font-size:19px; }
+  .mobile-social-tabs { display:flex; gap:0; border-bottom:1px solid #283957; margin-bottom:6px; }
+  .mobile-social-tabs button { flex:1; min-height:47px; border:0; border-bottom:3px solid transparent;
+    background:transparent; color:#9ba9c4; font-weight:700; font-size:12px; }
+  .mobile-social-tabs button[aria-selected="true"] { color:#85a5ff; border-bottom-color:#547aff; }
+  .lobby-social-column .social-panel { background:#101e37; border:1px solid #263856;
+    border-radius:14px; padding:15px 12px; }
+  .lobby-social-column .social-panel-scroll { max-height:none; overflow:visible; }
+  body[data-social-tab="friends"] .lobby-social-column .social-groups-panel { display:none !important; }
+  body[data-social-tab="groups"] .lobby-social-column .social-friends-panel,
+  body[data-social-tab="groups"] .lobby-social-column .social-requests-panel { display:none !important; }
+  .lobby-social-column .friend { min-height:62px; }
+  .lobby-social-column .friend-message-btn { min-height:36px; }
+  body[data-mobile-view="activity"] .activity-sidebar { padding:14px 12px; min-height:calc(100dvh - 155px); }
+}
+
+
+/* ===== Barres compactes : logo rond + nom, sans flÃ¨ches ===== */
+.main-content .compact-icon-strip,
+.main-content .games-grid.horizontal-carousel.compact-icon-strip,
+.main-content .language-grid.horizontal-carousel.compact-icon-strip {
+  display:flex; flex-wrap:nowrap; align-items:flex-start; justify-content:flex-start;
+  gap:15px; width:100%; overflow-x:auto; overflow-y:hidden;
+  padding:12px 10px 15px; scroll-snap-type:x proximity;
+  scrollbar-width:thin; scrollbar-color:#4a5b86 transparent;
+  background:#11151d; border-radius:14px;
+}
+.main-content .compact-icon-strip > .compact-icon-item,
+.main-content .games-grid.horizontal-carousel.compact-icon-strip > .compact-icon-item,
+.main-content .language-grid.horizontal-carousel.compact-icon-strip > .compact-icon-item {
+  display:flex; flex:0 0 77px; width:77px; min-width:77px; max-width:77px;
+  flex-direction:column; align-items:center; gap:8px; padding:2px 0 5px;
+  background:transparent; border:0; border-radius:10px; box-shadow:none;
+  color:#f3f5fa; text-decoration:none; text-align:center; transform:none;
+}
+.main-content .compact-icon-circle {
+  display:grid; place-items:center; width:55px; height:55px; flex:0 0 55px;
+  border-radius:50%; font-size:30px; line-height:1;
+  background:#202d4b; border:2px solid #344568;
+  box-shadow:0 2px 8px #0005;
+}
+.main-content .compact-icon-label {
+  display:block; width:100%; overflow:hidden; text-overflow:ellipsis;
+  white-space:nowrap; color:#dbe3f5; font-size:12px; line-height:1.3;
+}
+.main-content .compact-icon-item.is-ready { cursor:pointer; }
+.main-content .compact-icon-item.is-ready:hover .compact-icon-circle,
+.main-content .compact-icon-item.is-ready:focus-visible .compact-icon-circle {
+  border-color:#9166ff; box-shadow:0 0 0 3px #7138ff55;
+}
+.main-content .compact-icon-item.is-ready:focus-visible { outline:2px solid #9c8cff; outline-offset:3px; }
+.main-content .compact-icon-item.is-unavailable { cursor:default; opacity:.55; }
+.main-content .compact-language-section { display:block; padding:0; border:0; background:none; }
+.main-content .compact-language-section .compact-icon-strip { background:#101c34; }
+.main-content .compact-language-section .language-icon-circle { font-size:29px; }
+@media(max-width:760px) {
+  .main-content .compact-icon-strip,
+  .main-content .games-grid.horizontal-carousel.compact-icon-strip,
+  .main-content .language-grid.horizontal-carousel.compact-icon-strip { gap:8px; }
+  .main-content .compact-icon-strip > .compact-icon-item { flex-basis:69px; width:69px; min-width:69px; max-width:69px; }
+}
+
+/* Deux cadres distincts : jeux et langues */
+.main-content .compact-category-frame {
+  margin:20px 0 18px; padding:16px 18px 14px;
+  border:1px solid #34466d; border-radius:16px;
+  background:#0d1931; min-width:0;
+}
+.main-content .compact-category-frame .section-title { margin:0 0 12px; }
+.main-content .compact-category-frame .section-title h2 { font-size:18px; }
+.main-content .compact-category-frame .compact-icon-strip,
+.main-content .compact-category-frame .games-grid.horizontal-carousel.compact-icon-strip,
+.main-content .compact-category-frame .language-grid.horizontal-carousel.compact-icon-strip {
+  background:transparent; border:0; border-radius:0; padding:8px 0 10px;
+}
+.main-content .compact-languages-frame { border-color:#5c3caa; background:#111936; }
+.main-content .compact-language-section { margin:0; padding:0; border:0; background:transparent; }
+@media(max-width:760px) {
+  .main-content .compact-category-frame { margin:14px 0; padding:13px 12px; }
+}
+
+/* PrÃ©sentation dÃ©placÃ©e aprÃ¨s les deux cadres, sans illustration ni description */
+.hero.hero-bottom {
+  margin-top: 22px;
+  min-height: 0;
+  display: block;
+}
+.hero.hero-bottom .hero-content {
+  width: 100%;
+  padding: 22px 28px;
+}
+.hero.hero-bottom h1 {
+  max-width: none;
+  font-size: clamp(25px, 3vw, 40px);
+  line-height: 1.12;
+}
+@media (max-width: 760px) {
+  .hero.hero-bottom .hero-content { padding: 20px; }
+}
+
+/* Navigation simplifiÃ©e : accueil + deux personnes, sans libellÃ©s */
+.mobile-activity-slot { display:none; }
+@media(max-width:760px) {
+  .mobile-bottom-nav { justify-content:center; gap:18px; }
+  .mobile-nav-button { flex:0 1 110px; }
+  .mobile-nav-button svg { display:block; }
+  .mobile-activity-slot { display:block; margin:18px 0; }
+  .mobile-activity-slot > .activity-sidebar {
+    display:flex !important; flex-direction:column; width:100%; min-height:0;
+    border:1px solid rgba(148,163,184,.2); border-radius:16px;
+    background:#0d1931; padding:12px !important;
+  }
+  .mobile-activity-slot .activity-inbox { width:100%; }
+}
+/* Navigation mobile finale : deux icones sans aucun libelle visible */
+@media (max-width: 760px) {
+
+    nav.mobile-bottom-nav {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        gap: 50px;
+    }
+
+    nav.mobile-bottom-nav .mobile-nav-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        flex: 0 0 55px;
+        min-height: 42px;
+        padding: 6px;
+    }
+
+    nav.mobile-bottom-nav .mobile-nav-button svg {
+        display: block;
+        width: 24px;
+        height: 24px;
+        flex: none;
+    }
+
+    nav.mobile-bottom-nav .mobile-nav-button > span,
+    nav.mobile-bottom-nav .mobile-nav-button > small {
+        display: none !important;
+    }
+    nav.mobile-bottom-nav {
+    min-height: 56px;
+    padding: 5px 10px;
+}
+}

@@ -1,6 +1,10 @@
 // Photo de profil ou initiale du joueur.
 function gameLobbyAvatarHtml(player) {
-    const username = String(player?.username || "Joueur");
+    const username = String(
+    player?.pseudo?.trim() ||
+    player?.username ||
+    "Joueur"
+);
     const initial = username.trim().charAt(0).toUpperCase() || "?";
 
     const currentUser = JSON.parse(
@@ -412,6 +416,7 @@ function renderGameRooms(rooms) {
 
 
             const ownerName =
+                owner?.pseudo?.trim() ||
                 owner?.username ||
                 "Joueur";
 
@@ -437,6 +442,7 @@ function renderGameRooms(rooms) {
 
                     const username =
                         String(
+                            player.pseudo?.trim() ||
                             player.username ||
                             "Joueur"
                         );

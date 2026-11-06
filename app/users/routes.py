@@ -135,7 +135,7 @@ def get_friend_requests():
             {
                 "id": friend_request.id,
                 "sender_id": friend_request.sender_id,
-                "username": friend_request.sender.username,
+                "pseudo": friend_request.sender.pseudo or friend_request.sender.username,
                 "avatar_url": friend_request.sender.avatar_url,
                 "created_at": (
                     friend_request.created_at.isoformat() + "Z"
@@ -224,6 +224,7 @@ def get_friends():
         friends.append({
             "id": friend.id,
             "username": friend.username,
+            "pseudo": friend.pseudo or friend.username,
             "avatar_url": friend.avatar_url,
             "is_online": is_user_online(friend.id)
         })
@@ -366,6 +367,7 @@ def get_private_messages(friend_id):
         "friend": {
             "id": friend.id,
             "username": friend.username,
+            "pseudo": friend.pseudo or friend.username,
             "avatar_url": friend.avatar_url
         },
         "messages": [
@@ -425,7 +427,9 @@ def get_recent_private_conversations():
         if friend is None:
             continue
         conversations.append({
-            "friend": {"id": friend.id, "username": friend.username,
+            "friend": {"id": friend.id,
+                       "username": friend.username,
+                       "pseudo": friend.pseudo or friend.username,
                        "avatar_url": friend.avatar_url},
             "last_message": {"id": message.id, "content": message.content,
                              "sender_id": message.sender_id,
@@ -472,7 +476,10 @@ def _profile_payload(user, owner=False):
     from sqlalchemy import func
     from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
     data = {
-        "id": user.id, "username": user.username, "avatar_url": user.avatar_url,
+        "id": user.id,
+        "username": user.username,
+        "pseudo": user.pseudo or user.username,
+        "avatar_url": user.avatar_url,
         "banner_url": user.banner_url, "bio": user.bio,
         "account_days": max(0, (datetime.now(timezone.utc).date() - user.created_at.date()).days) if user.created_at else None,
         "is_online": is_user_online(user.id), "is_owner": owner,
@@ -518,11 +525,13 @@ def update_profile():
     data = request.get_json(silent=True)
     if not isinstance(data, dict):
         return {"error": "JSON invalide"}, 400
-    if "username" in data:
-        username = data["username"]
-        if not isinstance(username, str) or not 3 <= len(username.strip()) <= 50:
+    if "pseudo" in data:
+        pseudo = data["pseudo"]
+
+        if not isinstance(pseudo, str) or not 3 <= len(pseudo.strip()) <= 50:
             return {"error": "Pseudo : 3 à 50 caractères"}, 400
-        user.username = username.strip()
+
+        user.pseudo = pseudo.strip()
     if "bio" in data:
         bio = data["bio"]
         if not isinstance(bio, str) or len(bio) > 300:

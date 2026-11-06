@@ -388,6 +388,12 @@ def list_rooms():
                     if player.user
                     else f"Joueur #{player.user_id}",
 
+                "pseudo": (
+                    player.user.pseudo or player.user.username
+                    if player.user
+                    else f"Joueur #{player.user_id}"
+                ),
+
                 "avatar_url":
                     player.user.avatar_url
                     if player.user

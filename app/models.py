@@ -46,6 +46,13 @@ class User(db.Model):
         default=datetime.utcnow
     )
 
+    # Profil public et préférences linguistiques.
+    # Colonnes nullable pour rester compatibles avec les comptes existants.
+    pseudo = db.Column(db.String(50), nullable=True)
+    preferred_language = db.Column(db.String(5), nullable=True)
+    native_language = db.Column(db.String(5), nullable=True)
+    learning_language = db.Column(db.String(5), nullable=True)
+
     banner_url = db.Column(db.String(500), nullable=True)
     bio = db.Column(db.String(300), nullable=True)
     country_code = db.Column(db.String(2), nullable=True)
@@ -59,6 +66,10 @@ class User(db.Model):
         return {
             "id": self.id,
             "username": self.username,
+            "pseudo": self.pseudo or self.username,
+            "preferred_language": self.preferred_language,
+            "native_language": self.native_language,
+            "learning_language": self.learning_language,
             "email": self.email,
             "avatar_url": self.avatar_url,
             "is_active": self.is_active,
@@ -215,6 +226,7 @@ class GameRoomMember(db.Model):
             "id": self.id,
             "user_id": self.user_id,
             "username": self.user.username,
+            "pseudo": self.user.pseudo or self.user.username,
             "avatar_url": self.user.avatar_url,
             "role": self.role,
             "joined_at": (
@@ -271,6 +283,7 @@ class ChatMessage(db.Model):
             "room_id": self.room_id,
             "user_id": self.user_id,
             "username": self.user.username,
+            "pseudo": self.user.pseudo or self.user.username,
             "avatar_url": self.user.avatar_url,
             "message": self.message,
             "created_at": (
@@ -447,7 +460,7 @@ class FriendGroupMessage(db.Model):
     sender = db.relationship("User")
     def to_dict(self):
         return {"id": self.id, "group_id": self.group_id, "sender_id": self.sender_id,
-                "username": self.sender.username, "avatar_url": self.sender.avatar_url,
+                "username": self.sender.username, "pseudo": self.sender.pseudo or self.sender.username,"avatar_url": self.sender.avatar_url,
                 "content": self.content, "created_at": self.created_at.isoformat() + "Z"}
 
 class ChatExtra(db.Model):

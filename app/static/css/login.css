@@ -10,3 +10,34 @@
 .login-submit{min-height:49px;margin-top:6px;border:0;border-radius:10px;background:linear-gradient(100deg,#9136f5,#365efa);color:white;font-weight:800;cursor:pointer}.login-submit:hover{filter:brightness(1.1)}.login-submit:disabled{opacity:.65;cursor:wait}
 .login-feedback{margin:6px 0 0;color:#fca5a5;font-size:13px}.login-register{margin:29px 0 0;text-align:center;color:#8fa4c4;font-size:13px}.login-register a{color:#a998ff;text-decoration:none;font-weight:700}.login-register a:hover{text-decoration:underline}
 @media(max-width:480px){.login-shell{padding:18px 12px}.login-panel{padding:28px 22px}.login-intro h1{font-size:24px}}
+
+
+/* Une seule bordure autour des champs */
+.login-form input[type="text"],
+.login-form input[type="password"] {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
+    color: #ffffff !important;
+    min-width: 0;
+    flex: 1;
+}
+
+/* Supprimer la bordure intérieure au focus */
+.login-form input:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Correction du remplissage automatique Chrome */
+.login-form input:-webkit-autofill,
+.login-form input:-webkit-autofill:hover,
+.login-form input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0 1000px #0b1931 inset !important;
+    box-shadow: 0 0 0 1000px #0b1931 inset !important;
+    caret-color: #ffffff;
+}

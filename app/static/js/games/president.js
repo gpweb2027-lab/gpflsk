@@ -1,4 +1,130 @@
 let selectedCards = new Set();
+
+// Annonces royales et consultation unique : le serveur contrôle les droits.
+const royalAnnouncements = { seen: new Set(), queue: [], active: null, timer: null, matchKey: null };
+const ROYAL_LABELS = {
+  2: ['Président', 'Trou du cul'],
+  3: ['Président', 'Citoyen', 'Trou du cul'],
+  4: ['Président', 'Vice-président', 'Vice-trou du cul', 'Trou du cul'],
+  5: ['Président', 'Vice-président', 'Citoyen', 'Vice-trou du cul', 'Trou du cul'],
+  6: ['Président', 'Vice-président', 'Ministre', 'Citoyen', 'Vice-trou du cul', 'Trou du cul'],
+  7: ['Président', 'Vice-président', 'Grand ministre', 'Ministre', 'Citoyen', 'Vice-trou du cul', 'Trou du cul'],
+  8: ['Président', 'Vice-président', 'Grand ministre', 'Ministre', "Citoyen d'honneur", 'Citoyen', 'Vice-trou du cul', 'Trou du cul']
+};
+function royalTitle(position, count) {
+    return (ROYAL_LABELS[count] || [])[position - 1] || `${position}e place`;
+}
+function royalSelfId() {
+    try { return Number(JSON.parse(localStorage.getItem('user') || '{}').id); }
+    catch (_) { return NaN; }
+}
+function royalEnsureUI() {
+    if (document.getElementById('president-royal-announcement')) return;
+    const announce = document.createElement('div');
+    announce.id = 'president-royal-announcement';
+    announce.setAttribute('aria-live', 'polite');
+    announce.hidden = true;
+    document.body.append(announce);
+    const modal = document.createElement('div');
+    modal.id = 'president-royal-vision-modal';
+    modal.hidden = true;
+    modal.innerHTML = '<div class="president-vision-box" role="dialog" aria-modal="true" aria-label="Vision royale"><button class="president-vision-close" type="button" aria-label="Fermer">×</button><h3>👁 Vision royale</h3><p class="president-vision-player"></p><div class="president-vision-cards"></div><p class="president-vision-hint">Photographie des cartes au moment du clic · consultation unique</p></div>';
+    modal.querySelector('.president-vision-close').addEventListener('click', () => { modal.hidden = true; });
+    document.body.append(modal);
+}
+function royalShowNext() {
+    if (royalAnnouncements.active || !royalAnnouncements.queue.length) return;
+    royalEnsureUI();
+    const entry = royalAnnouncements.queue.shift();
+    royalAnnouncements.active = entry;
+    try { sessionStorage.setItem(`president-royal-shown:${royalAnnouncements.matchKey}:${entry.user_id}`, '1'); } catch (_) {}
+    const player = (latestState?.players || []).find(p => Number(p.user_id) === Number(entry.user_id));
+    const box = document.getElementById('president-royal-announcement');
+    box.replaceChildren();
+    const avatar = document.createElement('div'); avatar.className = 'president-royal-win-avatar';
+    if (player?.avatar_url) { const img = document.createElement('img'); img.src = player.avatar_url; img.alt = ''; avatar.append(img); }
+    else avatar.textContent = '👑';
+    const title = document.createElement('h2'); title.textContent = '👑 ' + royalTitle(entry.position, latestState?.players?.length || 0);
+    const name = document.createElement('strong'); name.textContent = player?.pseudo || entry.pseudo || player?.username || 'Joueur';
+    const info = document.createElement('p'); info.textContent = Number(entry.position) === 1 ? 'Termine premier et devient Président !' : `Termine à la ${entry.position}e place !`;
+    box.append(avatar, title, name, info);
+    if (Number(entry.user_id) === royalSelfId() && latestState?.royal_vision_available && Date.now() < Date.parse(latestState?.royal_vision_deadline || "")) {
+        const hint = document.createElement('small'); hint.textContent = '👁 Clique sur un avatar encore en jeu pour voir ses cartes une seule fois.';
+        box.append(hint);
+    }
+    box.hidden = false;
+    // Chaque annonce dure 5 s ; les consultations ne sont autorisées que
+    // pendant les 5 s réelles suivant le classement, même en cas de file d'attente.
+    royalAnnouncements.timer = setTimeout(() => {
+        box.hidden = true;
+        royalAnnouncements.active = null;
+        royalShowNext();
+    }, 10000);
+}
+function royalProcessResults(state) {
+    if (!state?.started) return;
+    const key = String(state.room_id) + ':' + String(state.round_started_at || '');
+    if (royalAnnouncements.matchKey !== key) {
+        royalAnnouncements.matchKey = key;
+        royalAnnouncements.seen.clear(); royalAnnouncements.queue.length = 0;
+        royalAnnouncements.active = null;
+        clearTimeout(royalAnnouncements.timer);
+        const el = document.getElementById('president-royal-announcement'); if (el) el.hidden = true;
+    }
+    for (const result of (state.results || [])) {
+        const id = String(result.user_id);
+        if (royalAnnouncements.seen.has(id)) continue;
+        royalAnnouncements.seen.add(id);
+         // L'annonce doit rester visible même si le résultat est reçu tardivement.
+        // Une annonce est présentée une seule fois par session et par manche.
+        const storageKey = `president-royal-shown:${key}:${id}`;
+        try { if (sessionStorage.getItem(storageKey) === '1') continue; } catch (_) {}
+        royalAnnouncements.queue.push(result);
+    }
+    royalAnnouncements.queue.sort((a, b) => {
+        const self = royalSelfId();
+        const aSelf = Number(a.user_id) === self ? 0 : 1;
+        const bSelf = Number(b.user_id) === self ? 0 : 1;
+        return aSelf - bSelf || Number(a.position) - Number(b.position);
+    });
+    royalShowNext();
+}
+let royalInspectPending = false;
+async function royalTryInspect(player) {
+    if (royalInspectPending) return true;
+    const state = latestState;
+    if (!state?.royal_vision_available || Number(royalAnnouncements.active?.user_id) !== royalSelfId() || Number(player.user_id) === royalSelfId() || Number(player.cards_count) < 1) return false;
+    const deadline = Date.parse(state.royal_vision_deadline || '');
+    if (!Number.isFinite(deadline) || Date.now() >= deadline) return false;
+    royalEnsureUI();
+    royalInspectPending = true;
+    try {
+        const response = await api(`/api/games/president/${encodeURIComponent(roomCode)}/royal-vision`, {
+            method: 'POST', body: JSON.stringify({target_user_id: player.user_id})
+        });
+        const payload = response?.data || response;
+        if (!response?.ok && !Array.isArray(payload?.cards)) throw new Error(payload?.error || 'Consultation refusée');
+        if (!Array.isArray(payload?.cards)) throw new Error(payload?.error || 'Aucune carte reçue');
+        state.royal_vision_available = false;
+        const modal = document.getElementById('president-royal-vision-modal');
+        modal.querySelector('.president-vision-player').textContent = `${player.pseudo || player.username || 'Joueur'} · ${payload.cards.length} carte(s)`;
+        const cards = modal.querySelector('.president-vision-cards'); cards.replaceChildren();
+        const suits = {H:'♥', D:'♦', C:'♣', S:'♠'};
+        for (const card of payload.cards) {
+            const el = document.createElement('div'); el.className = 'president-vision-card';
+            if (card.suit === 'H' || card.suit === 'D') el.classList.add('is-red');
+            el.textContent = `${card.rank}${suits[card.suit] || card.suit}`;
+            cards.append(el);
+        }
+        modal.hidden = false;
+    } catch (error) {
+        alert(error?.message || 'Vision royale indisponible');
+    } finally {
+        royalInspectPending = false;
+    }
+    return true;
+}
+
 function presidentIsSpectator(state = latestState) {
     if (!state) return false;
     let uid = null;
@@ -51,7 +177,9 @@ const presidentAudioState = {
       avatar.className = 'president-podium-avatar';
       avatar.disabled = !player;
       if (player) {
-        const name = player.username || result.username || `Joueur #${player.user_id}`;
+        const name = player.pseudo || result.pseudo ||
+             player.username || result.username || `Joueur #${player.user_id}`;
+
         avatar.setAttribute('aria-label', `Voir le profil de ${name}`);
         // Aucun caractère superposé à la photo.
         avatar.replaceChildren();
@@ -69,7 +197,7 @@ const presidentAudioState = {
       } else { avatar.textContent = '♛'; }
       const name = document.createElement('span');
       name.className = 'president-podium-name';
-      name.textContent = player ? (player.username || result.username || 'Joueur') : 'À déterminer';
+      name.textContent = player? (player.pseudo || result.pseudo || player.username || result.username || 'Joueur') : 'À déterminer';
       const status = document.createElement('span');
       status.className = 'president-podium-status';
       status.textContent = player ? labels[index] : 'En jeu';
@@ -327,7 +455,7 @@ function renderPresidentLastPlays(state) {
         item.style.opacity = String(0.4 + 0.6 * (i + 1) / recent.length);
         const name = document.createElement("span");
         name.className = "president-history-name";
-        name.textContent = entry.username || entry.player_name ||`Joueur #${entry.user_id || "?"}`;
+        name.textContent = entry.pseudo || entry.username || entry.player_name || `Joueur #${entry.user_id || "?"}`;
         const content = document.createElement("div");
         content.className = "president-history-cards";
         if (entry.action === "pass") {
@@ -365,7 +493,7 @@ function renderPresidentCards() {
        // Supprime uniquement le compteur local redondant sous la main.
     document.querySelectorAll(".local-hand-count").forEach(el => el.remove());
 
-    // Construire des rangées de 13 cartes maximum,
+    // Construire des rangées de 10 cartes maximum,
     // sans séparer les cartes de même valeur.
     const rows = [];
     let currentRow = [];
@@ -388,7 +516,7 @@ function renderPresidentCards() {
 
         if (
             currentRow.length > 0 &&
-            currentRow.length + group.length > 13
+            currentRow.length + group.length > 10
         ) {
             rows.push(currentRow);
             currentRow = [];
@@ -674,8 +802,9 @@ function renderPresidentPlayers(state) {
 
 
         const isCurrent =
-            Number(player.user_id) ===
-            Number(state.current_player);
+            !state.finished && state.current_player != null &&
+            Number(player.cards_count) > 0 &&
+            Number(player.user_id) === Number(state.current_player);
 
         const position =
                 getPresidentPlayerPosition(
@@ -729,10 +858,10 @@ function renderPresidentPlayers(state) {
         // ======================================
 
         const username =
+            player.pseudo ||
+            (isMe ? currentUser.pseudo : null) ||
             player.username ||
-            (isMe
-                ? (currentUser.username || currentUser.pseudo)
-                : null) ||
+            (isMe ? currentUser.username : null) ||
             `Joueur #${player.user_id}`;
 
         const avatar = document.createElement("div");
@@ -770,6 +899,10 @@ function renderPresidentPlayers(state) {
         // avec les cartes ou les commandes de la partie.
         const openTablePlayerProfile = (event) => {
             event.stopPropagation();
+            if (latestState?.royal_vision_available && Number(royalAnnouncements.active?.user_id) === royalSelfId() && Number(player.cards_count) > 0 && Number(player.user_id) !== royalSelfId()) {
+                royalTryInspect(player);
+                return;
+            }
             const playerId = Number(player.user_id);
             if (!Number.isInteger(playerId) || playerId <= 0) return;
             if (typeof window.openFullPlayerProfile === "function") {
@@ -1144,6 +1277,7 @@ function renderPresidentResults(state) {
                 result => {
 
                     const displayName =
+                        result.pseudo ||
                         result.username ||
                         `Joueur #${result.user_id}`;
 
@@ -1165,6 +1299,7 @@ function renderPresidentState(state) {
     }
 
     latestState = state;
+    royalProcessResults(state);
     const spectator = presidentIsSpectator(state);
     const handArea = document.querySelector(".president-local-hand");
     if (handArea) handArea.style.display = spectator ? "none" : "";
@@ -1216,6 +1351,9 @@ function renderPresidentState(state) {
     }
     // Actualisation du chiffre et de l'anneau, sans recréer l'avatar.
     updatePresidentTurnTimer(state);
+    if (state.finished || state.current_player == null) {
+        document.querySelectorAll('.president-table-player.is-current').forEach(el => el.classList.remove('is-current'));
+    }
     if (!gameChanged) {
         updatePresidentActionButtons();
         return;

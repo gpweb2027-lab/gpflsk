@@ -6,7 +6,11 @@ function openPlayerProfile(player) {
 
     if (!modal || !name || !avatar) return;
 
-    const username = String(player.username || "Joueur");
+    const username = String(
+            player.pseudo?.trim() ||
+            player.username ||
+            "Joueur"
+        );
     const avatarUrl = String(player.avatar_url || "").trim();
     const initial = username.trim().charAt(0).toUpperCase() || "?";
 
@@ -266,7 +270,11 @@ function renderRoomUpdate(data) {
             item.className = "spectator-item";
             const avatar = document.createElement("span");
             avatar.className = "spectator-avatar";
-            const username = String(spectator.username || "Spectateur");
+            const username = String(
+                spectator.pseudo?.trim() ||
+                spectator.username ||
+                "Spectateur"
+            );
             avatar.textContent = username.charAt(0).toUpperCase() || "?";
             const url = String(spectator.avatar_url || "").trim();
             if (url && ((url.startsWith("/") && !url.startsWith("//")) || /^https?:\/\//i.test(url))) {
@@ -339,6 +347,7 @@ function renderRoomUpdate(data) {
 
 
                 const username =
+                    player.pseudo?.trim() ||
                     player.username ||
                     `Joueur #${player.user_id}`;
 
@@ -579,11 +588,15 @@ function renderChatMessage(data) {
     container.querySelector(".chat-empty")?.remove();
 
     const currentUser = JSON.parse(localStorage.getItem("user") || "null");
-    const username = String(data.username || "Joueur");
+    const username = String(
+        data.pseudo?.trim() ||
+        data.username ||
+        "Joueur"
+    );
     const senderId = data.user_id ?? data.sender_id;
     const isMe = senderId != null && currentUser?.id != null
         ? String(senderId) === String(currentUser.id)
-        : username === currentUser?.username;
+        : username ===  (currentUser?.pseudo || currentUser?.username);
 
     const row = document.createElement("div");
     row.className = "chat-message" + (isMe ? " is-me" : "");

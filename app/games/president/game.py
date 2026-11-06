@@ -1,6 +1,7 @@
 import random
 from collections import Counter
-from datetime import datetime
+from datetime import datetime, timedelta
+from threading import RLock
 
 RANKS = ["3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A", "2"]
 SUITS = ["C", "D", "H", "S"]
@@ -11,7 +12,7 @@ class PresidentGame:
     """Moteur MVP du President.
 
     Règles de cette première version :
-    - 2 à 10 joueurs.
+    - 2 à 8 joueurs.
     - Jeu standard de 52 cartes.
     - 3 est la plus petite valeur, 2 la plus haute.
     - Une combinaison doit contenir 1, 2, 3 ou 4 cartes de même rang.
@@ -35,6 +36,10 @@ class PresidentGame:
         self.started = False
         self.finished = False
         self.results = []
+        self.royal_finished_at = {}
+        self.royal_vision_used = set()
+        self.royal_lock = RLock()
+        self.round_started_at = None
         self.play_history = []  # Derniers coups joués (sans les passes)
         self.turn_started_at = None
 
@@ -45,8 +50,8 @@ class PresidentGame:
         if self.started:
             raise ValueError("Game already started")
         if user_id not in self.players:
-            if len(self.players) >= 10:
-                raise ValueError("Maximum 10 players")
+            if len(self.players) >= 8:
+                raise ValueError("Maximum 8 players")
             self.players.append(user_id)
 
     def start(self):
@@ -70,6 +75,7 @@ class PresidentGame:
             hand.sort(key=lambda c: (RANK_VALUE[c["rank"]], SUITS.index(c["suit"])))
 
         self.started = True
+        self.round_started_at = datetime.utcnow()
         self.finished = False
         # Le premier joueur est tiré au sort à chaque nouvelle partie.
         self.current_player_index = random.randrange(len(self.players))
@@ -77,14 +83,19 @@ class PresidentGame:
         self.current_play_rank = None
         self.current_play_count = 0
         self.play_history = []
+        self.results = []
+        self.royal_finished_at = {}
+        self.royal_vision_used = set()
         self.last_player_index = None
         self.consecutive_passes = 0
         self._start_turn_timer()
 
     def current_player(self):
-        if not self.players:
+        # Aucun tour après la fin de la manche, ni pour un joueur classé.
+        if not self.started or self.finished or not self.players:
             return None
-        return self.players[self.current_player_index]
+        user_id = self.players[self.current_player_index]
+        return user_id if self.hands.get(user_id) else None
 
     def _advance(self):
         if not self.players:
@@ -163,6 +174,14 @@ class PresidentGame:
 
         if not self.hands[user_id]:
             self.results.append(user_id)
+            self.royal_finished_at[user_id] = datetime.utcnow()
+            # Un joueur classé ne peut plus conserver le pli ni reprendre la main.
+            # Le joueur actif suivant ouvre donc un nouveau pli librement.
+            self.current_play = []
+            self.current_play_rank = None
+            self.current_play_count = 0
+            self.last_player_index = None
+            self.consecutive_passes = 0
             if self._active_player_count() <= 1:
                 self.finished = True
                 remaining = [
@@ -170,6 +189,8 @@ class PresidentGame:
                     if uid not in self.results
                 ]
                 self.results.extend(remaining)
+                for uid in remaining:
+                    self.royal_finished_at[uid] = datetime.utcnow()
                 return
 
         self._advance()
@@ -200,13 +221,22 @@ class PresidentGame:
 
         active_players = self._active_player_count()
         if self.consecutive_passes >= max(active_players - 1, 1):
-            # The last player who played gets the lead again.
-            self.current_player_index = self.last_player_index
+            # Si le dernier poseur est déjà classé, il ne reprend jamais le tour.
+            leader = self.last_player_index
+            leader_is_active = (
+                    leader is not None
+                    and bool(self.hands.get(self.players[leader]))
+            )
             self.current_play = []
             self.current_play_rank = None
             self.current_play_count = 0
             self.consecutive_passes = 0
-            self._start_turn_timer()
+            self.last_player_index = None
+            if leader_is_active:
+                self.current_player_index = leader
+                self._start_turn_timer()
+            else:
+                self._advance()
             return
 
         self._advance()
@@ -271,6 +301,26 @@ class PresidentGame:
             [lowest_card["id"]]
         )
 
+    def royal_vision_status(self, user_id):
+        """Un joueur classé a cinq secondes pour consulter une seule main."""
+        finished_at = self.royal_finished_at.get(user_id)
+        if finished_at is None or user_id in self.royal_vision_used:
+            return False
+        if datetime.utcnow() >= finished_at + timedelta(seconds=5):
+            return False
+        return any(self.hands.get(uid) for uid in self.players if uid != user_id)
+
+    def use_royal_vision(self, viewer_id, target_id):
+        with self.royal_lock:
+            if viewer_id not in self.players or not self.royal_vision_status(viewer_id):
+                raise ValueError("Vision royale indisponible ou déjà utilisée")
+            if target_id == viewer_id or target_id not in self.players or not self.hands.get(target_id):
+                raise ValueError("Ce joueur n'a plus de cartes à consulter")
+            # Copie instantanée : aucune mise à jour après la consultation.
+            snapshot = [dict(card) for card in self.hands[target_id]]
+            self.royal_vision_used.add(viewer_id)
+            return snapshot
+
     def get_player_username(self, user_id):
         from app.models import User
 
@@ -279,7 +329,7 @@ class PresidentGame:
         if user is None:
             return f"Joueur #{user_id}"
 
-        return user.username
+        return user.pseudo or user.username
 
     def public_state_for(self, user_id):
         hand = self.hands.get(user_id, [])
@@ -304,6 +354,11 @@ class PresidentGame:
                     if player_user
                     else f"Joueur #{uid}"
                 ),
+                "pseudo": (
+                    (player_user.pseudo or player_user.username)
+                    if player_user
+                    else f"Joueur #{uid}"
+                ),
                 "avatar_url": (
                     player_user.avatar_url
                     if player_user
@@ -318,6 +373,7 @@ class PresidentGame:
 
         return {
             "room_id": self.room_id,
+            "round_started_at": self.round_started_at.isoformat() + "Z" if self.round_started_at else None,
             "started": self.started,
             "finished": self.finished,
             "current_player": self.current_player(),
@@ -331,6 +387,9 @@ class PresidentGame:
                 {
                     **play,
                     "username": users[play["user_id"]].username
+                    if play["user_id"] in users
+                    else f"Joueur #{play['user_id']}",
+                    "pseudo": (users[play["user_id"]].pseudo or users[play["user_id"]].username)
                     if play["user_id"] in users
                     else f"Joueur #{play['user_id']}",
                 }
@@ -347,8 +406,22 @@ class PresidentGame:
                 self.results.index(user_id) + 1
                 if user_id in self.results else None
             ),
+            "royal_vision_available": self.royal_vision_status(user_id),
+            "royal_vision_deadline": (
+                (self.royal_finished_at[user_id] + timedelta(seconds=5)).isoformat() + "Z"
+                if user_id in self.royal_finished_at else None
+            ),
             "results": [
-                {"user_id": uid, "position": index + 1}
+                {
+                    "user_id": uid,
+                    "position": index + 1,
+                    "finished_at": (self.royal_finished_at[uid].isoformat() + "Z")
+                    if uid in self.royal_finished_at else None,
+                    "pseudo": (users[uid].pseudo or users[uid].username)
+                    if uid in users else f"Joueur #{uid}",
+                    "username": users[uid].username
+                    if uid in users else f"Joueur #{uid}",
+                }
                 for index, uid in enumerate(self.results)
             ],
         }

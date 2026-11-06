@@ -40,6 +40,7 @@ def enrich(kind, message, payload=None):
             result["reply_to"] = {
                 "id": original.id,
                 "username": getattr(author, "username", "Joueur") if author else "Joueur",
+                "pseudo": ((author.pseudo or author.username)if author else "Joueur"),
                 "content": "Message supprimé" if original_extra and original_extra.deleted else (original.message if kind == "room" else original.content)
             }
     if result["deleted"]:

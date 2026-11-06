@@ -1822,3 +1822,36 @@
   #game-panel .president-player-name-row .president-player-name { max-width: 75px; }
   #game-panel .president-player-name-row .president-card-count { font-size: 11px; }
 }
+/* Mobile : masquer le podium latéral et rendre toute la largeur à la table. */
+@media (max-width: 800px) {
+  #game-panel .president-royal-podium { display: none !important; }
+  #game-panel .president-royal-layout {
+    display: block !important;
+    width: 100%;
+    min-width: 0;
+  }
+  #game-panel .president-royal-layout > .president-table {
+    width: 100% !important;
+    min-width: 0;
+    margin: 0;
+  }
+}
+
+
+/* Annonce royale non bloquante et vision à usage unique. */
+#president-royal-announcement[hidden], #president-royal-vision-modal[hidden] {display:none!important}
+#president-royal-announcement {position:fixed;z-index:9997;top:12%;left:50%;transform:translateX(-50%);width:min(92vw,350px);padding:18px;text-align:center;border:1px solid #d6ad5a;border-radius:18px;background:linear-gradient(145deg,#172b4a,#081528);box-shadow:0 14px 45px #0009;color:#fff;pointer-events:none}
+#president-royal-announcement h2 {color:#f4d18a;font-size:1.45rem;margin:6px 0}
+#president-royal-announcement p {margin:6px 0}
+#president-royal-announcement small {display:block;color:#f6d38d;margin-top:8px}
+.president-royal-win-avatar {height:66px;width:66px;margin:auto;border:2px solid #e5bc68;border-radius:50%;display:grid;place-items:center;font-size:30px;overflow:hidden}
+.president-royal-win-avatar img {width:100%;height:100%;object-fit:cover}
+#president-royal-vision-modal {position:fixed;inset:0;z-index:10000;background:#0009;display:grid;place-items:center;padding:14px}
+.president-vision-box {position:relative;width:min(95vw,550px);max-height:85vh;overflow:auto;background:#10223e;color:white;border:1px solid #d6ad5a;border-radius:16px;padding:22px;text-align:center}
+.president-vision-box h3 {color:#f4d18a;margin:0 0 12px}
+.president-vision-close {position:absolute;top:8px;right:12px;background:transparent;color:white;border:0;font-size:28px;cursor:pointer}
+.president-vision-cards {display:flex;justify-content:center;flex-wrap:wrap;gap:7px;margin:16px 0}
+.president-vision-card {display:grid;place-items:center;width:47px;height:68px;background:#fff;color:#152033;border-radius:7px;font-size:18px;font-weight:bold;border:1px solid #ccc}
+.president-vision-card.is-red {color:#c1263b}
+.president-vision-hint {font-size:12px;color:#c4cee0}
+@media(max-width:600px){#president-royal-announcement{top:7%;padding:12px} .president-vision-card{width:38px;height:56px;font-size:15px}}

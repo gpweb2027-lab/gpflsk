@@ -22,7 +22,7 @@ def serialize(group, user_id):
     members = FriendGroupMember.query.filter_by(group_id=group.id).all()
     last = FriendGroupMessage.query.filter_by(group_id=group.id).order_by(FriendGroupMessage.id.desc()).first()
     return {"id": group.id, "name": group.name, "owner_id": group.owner_id,
-            "members": [{"id": m.user_id, "username": m.user.username, "avatar_url": m.user.avatar_url} for m in members],
+            "members": [{"id": m.user_id, "username": m.user.username,"pseudo": m.user.pseudo or m.user.username, "avatar_url": m.user.avatar_url} for m in members],
             "last_message": last.to_dict() if last else None}
 
 @groups_bp.get("")

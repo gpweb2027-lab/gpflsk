@@ -29,7 +29,6 @@ async function createPresidentRoom() {
         `/room/${encodeURIComponent(room.code)}`;
 }
 
-
 async function joinRoom(roomCode) {
 
     if (!roomCode) {
@@ -55,9 +54,7 @@ async function joinRoom(roomCode) {
         `/room/${encodeURIComponent(roomCode)}`;
 }
 
-
 async function loadPublicRooms() {
-
     const container =
         document.getElementById(
             "public-rooms-list"
@@ -182,7 +179,6 @@ async function loadPublicRooms() {
         });
 }
 
-
 document.addEventListener(
     "DOMContentLoaded",
     () => {
@@ -223,11 +219,11 @@ document.addEventListener(
 
             if (
                 username &&
-                user.username
+                (user.pseudo || user.username)
             ) {
 
                 username.textContent =
-                    user.username;
+                    (user.pseudo || user.username);
 
             }
 
@@ -303,7 +299,7 @@ async function loadAcceptedFriends() {
             if (friend.avatar_url) {
                 const img = document.createElement("img");
                 img.src = friend.avatar_url;
-                img.alt = "Avatar de " + friend.username;
+                img.alt = "Avatar de " + (friend.pseudo || friend.username);
                 img.onerror = () => {
                     avatar.textContent = "👤";
                 };
@@ -313,7 +309,7 @@ async function loadAcceptedFriends() {
             }
 
             const username = document.createElement("strong");
-            username.textContent = friend.username;
+            username.textContent = (friend.pseudo || friend.username);
 
             row.appendChild(avatar);
             row.appendChild(username);
@@ -386,7 +382,7 @@ function initFriendsModal() {
                 }
 
                 const username = document.createElement("strong");
-                username.textContent = friendRequest.username;
+                username.textContent = (friendRequest.pseudo || friendRequest.username);
 
                 const info = document.createElement("div");
                 info.className = "friend-request-info";
@@ -555,8 +551,7 @@ async function loadDashboardFriends() {
             if (friend.avatar_url) {
                 const img = document.createElement("img");
                 img.src = friend.avatar_url;
-                img.alt = "Avatar de " + friend.username;
-
+                img.alt = "Avatar de " + (friend.pseudo || friend.username);
                 img.style.width = "100%";
                 img.style.height = "100%";
                 img.style.objectFit = "cover";
@@ -576,7 +571,7 @@ async function loadDashboardFriends() {
             info.className = "friend-info";
 
             const username = document.createElement("strong");
-            username.textContent = friend.username;
+            username.textContent = (friend.pseudo || friend.username);
 
             // Pastille de connexion devant le pseudo
             const statusDot = document.createElement("span");
@@ -650,7 +645,7 @@ function createStyledPrivateMessage(message, friend) {
     const meta = document.createElement("div");
     meta.className = "private-chat-meta";
     const name = document.createElement("strong");
-    name.textContent = mine ? (currentUser?.username || "Vous") : (friend?.username || "Joueur");
+    name.textContent = mine ? ((currentUser?.pseudo || currentUser?.username) || "Vous") : (friend?.pseudo || friend?.username || "Joueur");
     name.classList.add("chat-profile-link");
     name.addEventListener("click", () => {
         const id = mine ? currentUser?.id : friend?.id;
@@ -719,7 +714,7 @@ function setupPrivateChatHeader(friend) {
     const profile = document.createElement("button");
     profile.type = "button";
     profile.className = "chat-header-profile";
-    profile.title = "Voir le profil de " + friend.username;
+    profile.title = "Voir le profil de " + (friend.pseudo || friend.username);
     profile.addEventListener("click", () => {
         if (typeof window.openFullPlayerProfile === "function") window.openFullPlayerProfile(friend.id);
     });
@@ -735,7 +730,7 @@ function setupPrivateChatHeader(friend) {
     const labels = document.createElement("span");
     labels.className = "chat-header-labels";
     const name = document.createElement("strong");
-    name.textContent = friend.username || "Joueur";
+    name.textContent = (friend.pseudo || friend.username) || "Joueur";
     const subtitle = document.createElement("small");
     const dot = document.createElement("span");
     dot.className = "chat-presence-dot " + (friend.is_online ? "online" : "offline");
@@ -799,6 +794,7 @@ function getOpenChatFriend() {
     return {
         id: Number(modal?.dataset.friendId),
         username: modal?.dataset.friendName || "Joueur",
+        pseudo: modal?.dataset.friendName || "Joueur",
         avatar_url: modal?.dataset.friendAvatar || ""
     };
 }
@@ -813,7 +809,7 @@ async function openPrivateChat(friend) {
 
     setupPrivateChatHeader(friend);
     modal.dataset.friendId = String(friend.id);
-    modal.dataset.friendName = friend.username || "Joueur";
+    modal.dataset.friendName = (friend.pseudo || friend.username) || "Joueur";
     modal.dataset.friendAvatar = friend.avatar_url || "";
     delete messages.dataset.signature;
 
@@ -1138,4 +1134,48 @@ document.addEventListener("DOMContentLoaded", () => {
     refreshPendingRequests();
     setInterval(refreshPendingRequests, 10000);
     document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshPendingRequests(); });
+});
+// Sur mobile, l'activité rejoint l'accueil, après les langues et avant la bannière.
+// Le même noeud DOM est réutilisé : pas de duplication d'API ni de listeners.
+document.addEventListener("DOMContentLoaded", () => {
+    const buttons = [...document.querySelectorAll("[data-mobile-view]")];
+    const tabs = [...document.querySelectorAll("[data-social-tab]")];
+    const sidebar = document.querySelector(".app-layout > .activity-sidebar");
+    const slot = document.getElementById("mobile-activity-slot");
+    const layout = document.querySelector(".app-layout");
+    const mobile = window.matchMedia("(max-width: 760px)");
+
+    function placeActivity() {
+        if (!sidebar || !slot || !layout) return;
+        if (mobile.matches) {
+            if (sidebar.parentElement !== slot) slot.appendChild(sidebar);
+        } else if (sidebar.parentElement !== layout) {
+            layout.insertBefore(sidebar, layout.firstElementChild);
+        }
+    }
+
+    function showView(view) {
+        const selected = view === "social" ? "social" : "home";
+        document.body.dataset.mobileView = selected;
+        buttons.forEach(button => {
+            const active = button.dataset.mobileView === selected;
+            button.classList.toggle("is-active", active);
+            if (active) button.setAttribute("aria-current", "page");
+            else button.removeAttribute("aria-current");
+        });
+        window.scrollTo({top: 0, behavior: "instant"});
+    }
+
+    function showSocialTab(tab) {
+        const selected = tab === "groups" ? "groups" : "friends";
+        document.body.dataset.socialTab = selected;
+        tabs.forEach(button => button.setAttribute("aria-selected", String(button.dataset.socialTab === selected)));
+    }
+
+    buttons.forEach(button => button.addEventListener("click", () => showView(button.dataset.mobileView)));
+    tabs.forEach(button => button.addEventListener("click", () => showSocialTab(button.dataset.socialTab)));
+    mobile.addEventListener("change", placeActivity);
+    placeActivity();
+    showSocialTab("friends");
+    showView("home");
 });

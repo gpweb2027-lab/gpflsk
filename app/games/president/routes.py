@@ -113,6 +113,14 @@ def build_game_state(room, game, user_id):
         if member.user
     }
 
+    pseudos = {
+        member.user_id: (
+                member.user.pseudo or member.user.username
+        )
+        for member in members
+        if member.user
+    }
+
     avatars = {
         member.user_id: member.user.avatar_url
         for member in members
@@ -126,6 +134,10 @@ def build_game_state(room, game, user_id):
             uid,
             f"Joueur #{uid}"
         )
+        player["pseudo"] = pseudos.get(
+            uid,
+            f"Joueur #{uid}"
+        )
 
         player["avatar_url"] = avatars.get(uid)
 
@@ -136,6 +148,23 @@ def build_game_state(room, game, user_id):
             uid,
             f"Joueur #{uid}"
         )
+        result["pseudo"] = pseudos.get(
+            uid,
+            f"Joueur #{uid}"
+        )
+
+    # Pseudos des joueurs dans les derniers coups.
+    for history_key in ("last_plays", "last_three_plays"):
+        history = state.get(history_key)
+        if isinstance(history, list):
+            for entry in history:
+                if not isinstance(entry, dict):
+                    continue
+                uid = entry.get("user_id")
+                if uid is not None:
+                    entry["pseudo"] = pseudos.get(
+                        uid, entry.get("pseudo") or entry.get("username") or f"Joueur #{uid}"
+                    )
 
     config = get_game_config(
         room.game_type
@@ -434,3 +463,29 @@ def pass_turn(room_code):
             user_id
         )
     }
+
+@president_bp.post("/<string:room_code>/royal-vision")
+@jwt_required()
+def use_royal_vision(room_code):
+    """Renvoie une photographie d'une main, une seule fois, pendant 5 s."""
+    user_id = int(get_jwt_identity())
+    room = get_room_or_404(room_code)
+    if room is None:
+        return {"error": "Salon introuvable"}, 404
+    member = get_member(room.id, user_id)
+    if not member or member.role != "PLAYER":
+        return {"error": "Réservé aux joueurs de la manche"}, 403
+    game = get_game(room)
+    if not game or not game.started:
+        return {"error": "Aucune manche en cours"}, 409
+    data = request.get_json(silent=True) or {}
+    try:
+        target_id = int(data.get("target_user_id"))
+    except (ValueError, TypeError):
+        return {"error": "Joueur cible invalide"}, 400
+    try:
+        cards = game.use_royal_vision(user_id, target_id)
+    except ValueError as exc:
+        return {"error": str(exc)}, 403
+    # Ne jamais inclure les mains adverses dans l'état public ou les sockets.
+    return {"target_user_id": target_id, "cards": cards, "used": True}

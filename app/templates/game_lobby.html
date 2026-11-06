@@ -5,6 +5,26 @@
     rel="stylesheet"
     href="{{ url_for('static', filename='css/games.css') }}"
 >
+<style>
+/* Page des salons : styles isolés pour ne pas modifier la table de jeu. */
+.president-lobby-tabs { display:flex; gap:clamp(4px,2vw,24px); border-bottom:1px solid rgba(147,163,195,.22); margin:22px 0 20px; }
+.president-lobby-tab { flex:1; min-width:0; padding:13px 5px; border:0; border-bottom:2px solid transparent; background:transparent; color:#98a5c2; font:700 clamp(10px,2.5vw,12px)/1.35 inherit; font-family:inherit; letter-spacing:.045em; cursor:pointer; }
+.president-lobby-tab.is-active { color:#c3b3ff; border-bottom-color:#8b6bff; }
+.president-lobby-tab:focus-visible { outline:2px solid #a993ff; outline-offset:-3px; }
+.president-lobby-panel[hidden] { display:none !important; }
+.president-lobby-panel { display:grid; gap:16px; }
+.president-lobby-card { padding:clamp(18px,3vw,25px); border:1px solid rgba(115,136,191,.26); border-radius:18px; background:#101d38; box-shadow:0 12px 32px rgba(0,0,0,.09); }
+.president-lobby-card h2 { margin:0 0 18px; color:#f6f7ff; font-size:clamp(13px,2.7vw,16px); font-weight:750; letter-spacing:.035em; }
+.president-lobby-create .create-room-button { display:flex; justify-content:center; align-items:center; gap:7px; width:100%; max-width:none; }
+.president-lobby-rooms .game-room-list { margin:0; }
+.president-lobby-placeholder { padding:25px 8px; text-align:center; color:#a8b5d1; }
+.president-lobby-placeholder span { display:block; margin-bottom:12px; font-size:32px; }
+.president-lobby-placeholder p { margin:0; }
+.president-lobby-rules { color:#c5cde0; line-height:1.65; }
+.president-lobby-rules ul { margin:12px 0 0; padding-left:22px; }
+.president-lobby-rules li + li { margin-top:8px; }
+@media(max-width:480px) { .president-lobby-tabs { gap:0; } .president-lobby-tab { letter-spacing:0; } }
+</style>
 {% endblock %}
 
 
@@ -62,75 +82,50 @@
     </header>
 
 
-    <!-- HERO -->
-    <section class="game-browser-hero">
+  <!-- NAVIGATION PRINCIPALE -->
+    <nav class="president-lobby-tabs" role="tablist" aria-label="Navigation du jeu">
+        <button type="button" id="president-tab-jeux" class="president-lobby-tab is-active" role="tab" aria-selected="true" aria-controls="president-panel-jeux" data-lobby-tab="jeux">JEUX</button>
+        <button type="button" id="president-tab-classement" class="president-lobby-tab" role="tab" aria-selected="false" aria-controls="president-panel-classement" data-lobby-tab="classement" tabindex="-1">CLASSEMENT</button>
+        <button type="button" id="president-tab-regles" class="president-lobby-tab" role="tab" aria-selected="false" aria-controls="president-panel-regles" data-lobby-tab="regles" tabindex="-1">COMMENT JOUER</button>
+    </nav>
 
-        <div>
+    <div id="president-panel-jeux" class="president-lobby-panel" role="tabpanel" aria-labelledby="president-tab-jeux">
+        <!-- Pavé distinct pour créer une partie -->
+        <section class="president-lobby-card president-lobby-create" aria-labelledby="president-create-heading">
+            <h2 id="president-create-heading">CRÉER UNE PARTIE</h2>
+            <button id="create-game-room" class="create-room-button" type="button">
+                <span aria-hidden="true">＋</span> Créer une partie
+            </button>
+        </section>
 
-            <span class="game-browser-badge">
-                {{ game.emoji }}
-                {{ game.name|upper }}
-            </span>
+        <!-- Pavé distinct pour les salons publics -->
+        <section class="president-lobby-card president-lobby-rooms available-games-panel" aria-labelledby="president-rooms-heading">
+            <h2 id="president-rooms-heading">SALONS DISPONIBLES</h2>
+            <div id="game-rooms" class="game-room-list" aria-live="polite">
+                <div class="rooms-loading">Chargement des parties...</div>
+            </div>
+        </section>
+    </div>
 
-            <h2>
-                Trouve ta prochaine partie
-            </h2>
-
-            <p>
-                Rejoins une salle en attente ou crée
-                ton propre salon et invite tes amis.
-            </p>
-
+    <section id="president-panel-classement" class="president-lobby-panel president-lobby-card" role="tabpanel" aria-labelledby="president-tab-classement" hidden>
+        <h2>CLASSEMENT</h2>
+        <div class="president-lobby-placeholder">
+            <span aria-hidden="true">🏆</span>
+            <p>Le classement des joueurs sera disponible prochainement.</p>
         </div>
-
-        <button
-            id="create-game-room"
-            class="create-room-button"
-            type="button"
-        >
-            <span>＋</span>
-            Créer une partie
-        </button>
-
     </section>
 
-
-    <!-- ROOMS -->
-    <section class="available-games-panel">
-
-        <div class="available-games-heading">
-
-            <div>
-                <h2>
-                    Parties disponibles
-                </h2>
-
-                <p>
-                    Salons actuellement ouverts
-                    aux nouveaux joueurs.
-                </p>
-            </div>
-
-            <button
-                id="refresh-game-rooms"
-                class="refresh-rooms-button"
-                type="button"
-            >
-                ↻ Actualiser
-            </button>
-
-        </div>
-
-
-        <div
-            id="game-rooms"
-            class="game-room-list"
-        >
-            <div class="rooms-loading">
-                Chargement des parties...
-            </div>
-        </div>
-
+    <section id="president-panel-regles" class="president-lobby-panel president-lobby-card president-lobby-rules" role="tabpanel" aria-labelledby="president-tab-regles" hidden>
+        <h2>COMMENT JOUER</h2>
+        <p>Le but est de te débarrasser de toutes tes cartes avant les autres joueurs.</p>
+        <ul>
+            <li>Les cartes vont du 3 (la plus faible) au 2 (la plus forte).</li>
+            <li>Joue une carte, une paire, un brelan ou un carré de même valeur.</li>
+            <li>Pour recouvrir un coup, joue le même nombre de cartes, mais d'une valeur supérieure.</li>
+            <li>Tu peux passer lorsque des cartes sont déjà posées.</li>
+            <li>Quand tous les autres joueurs ont passé, le dernier joueur à avoir joué relance le pli.</li>
+            <li>Le premier joueur à ne plus avoir de cartes termine premier.</li>
+        </ul>
     </section>
 <!-- CREATE ROOM MODAL -->
 <div
@@ -285,6 +280,38 @@
 
     const currentGameConfig =
         {{ game|tojson }};
+</script>
+
+<script>
+/* Onglets accessibles : les éléments de création et de liste gardent leurs IDs. */
+(() => {
+    const tabs = [...document.querySelectorAll('[data-lobby-tab]')];
+    const panels = {
+        jeux: document.getElementById('president-panel-jeux'),
+        classement: document.getElementById('president-panel-classement'),
+        regles: document.getElementById('president-panel-regles')
+    };
+    function activate(name, focus = false) {
+        tabs.forEach(tab => {
+            const selected = tab.dataset.lobbyTab === name;
+            tab.classList.toggle('is-active', selected);
+            tab.setAttribute('aria-selected', String(selected));
+            tab.tabIndex = selected ? 0 : -1;
+            if (selected && focus) tab.focus();
+        });
+        Object.entries(panels).forEach(([key, panel]) => { if (panel) panel.hidden = key !== name; });
+    }
+    tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => activate(tab.dataset.lobbyTab));
+        tab.addEventListener('keydown', event => {
+            if (!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
+            event.preventDefault();
+            const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1
+                : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+            activate(tabs[next].dataset.lobbyTab, true);
+        });
+    });
+})();
 </script>
 
 <script

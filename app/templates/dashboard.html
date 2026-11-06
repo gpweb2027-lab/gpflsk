@@ -53,168 +53,58 @@
 
     <main class="main-content">
 
-        <!-- HERO -->
+       <!-- JEUX : icônes compactes, liens uniquement si disponibles -->
+        <div class="compact-category-frame compact-games-frame">
+        <div class="section-title"><h2>Jeux disponibles</h2></div>
+        <section id="games-carousel" class="games-grid horizontal-carousel compact-icon-strip" aria-label="Liste des jeux" tabindex="0">
+          {% for game in games %}
+            {% if game.name == "President" %}
+              <a class="compact-icon-item is-ready" href="/games/president" aria-label="Jouer à {{ game.name }}">
+                <span class="compact-icon-circle game-{{ loop.index }}" aria-hidden="true">{{ game.emoji }}</span>
+                <span class="compact-icon-label">{{ game.name }}</span>
+              </a>
+            {% else %}
+              <div class="compact-icon-item is-unavailable" aria-label="{{ game.name }} : bientôt disponible" title="Bientôt disponible">
+                <span class="compact-icon-circle game-{{ loop.index }}" aria-hidden="true">{{ game.emoji }}</span>
+                <span class="compact-icon-label">{{ game.name }}</span>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </section>
+        </div>
 
-        <section class="hero">
+        <!-- LANGUES : barre distincte, liens si une URL est configurée -->
+        <div class="compact-category-frame compact-languages-frame">
+        <div class="section-title language-title"><h2>Apprendre des langues</h2></div>
+        <section class="language-section compact-language-section">
+          <div id="languages-carousel" class="language-grid horizontal-carousel compact-icon-strip" aria-label="Liste des langues" tabindex="0">
+            {% for language in languages %}
+              {% if language.url is defined and language.url %}
+                <a class="compact-icon-item is-ready" href="{{ language.url }}" aria-label="Apprendre {{ language.name }}">
+                  <span class="compact-icon-circle language-icon-circle" aria-hidden="true">{{ language.flag }}</span>
+                  <span class="compact-icon-label">{{ language.name }}</span>
+                </a>
+              {% else %}
+                <div class="compact-icon-item is-unavailable" aria-label="{{ language.name }} : bientôt disponible" title="Bientôt disponible">
+                  <span class="compact-icon-circle language-icon-circle" aria-hidden="true">{{ language.flag }}</span>
+                  <span class="compact-icon-label">{{ language.name }}</span>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </section>
+        </div>
 
+          <!-- Activité : sur mobile, les éléments existants sont déplacés ici par JS -->
+        <div id="mobile-activity-slot" class="mobile-activity-slot"></div>
+          <!-- PRÉSENTATION DÉPLACÉE EN BAS -->
+        <section class="hero hero-bottom" aria-label="Bienvenue sur Game Platform">
             <div class="hero-content">
-
-                <h1>
-                    Joue, discute<br>
-                    et <span>apprends ensemble.</span>
-                </h1>
-
-                <p>
-                    Des jeux multijoueurs et un espace
-                    d'échange linguistique pour rencontrer
-                    des gens du monde entier.
-                </p>
-
+                <h1>Joue, discute<br>et <span>apprends ensemble.</span></h1>
             </div>
-
-
-            <div class="hero-art">
-
-                <div class="planet">🌍</div>
-
-                <div class="bubble bubble-one">
-                    En Hello!
-                </div>
-
-                <div class="bubble bubble-two">
-                    🇫🇷 Bonjour!
-                </div>
-
-                <div class="bubble bubble-three">
-                    🇪🇸 ¡Hola!
-                </div>
-
-                <div class="bubble bubble-four">
-                    🇩🇪 Hallo!
-                </div>
-
-            </div>
-
         </section>
 
-        <!-- JEUX -->
-
-        <div class="section-title">
-
-            <h2>Jeux disponibles</h2>
-
-            <div class="carousel-controls" aria-label="Navigation des jeux">
-                <button type="button" class="carousel-arrow" data-scroll-target="games-carousel" data-scroll-direction="-1" aria-label="Jeux précédents">←</button>
-                <button type="button" class="carousel-arrow" data-scroll-target="games-carousel" data-scroll-direction="1" aria-label="Jeux suivants">→</button>
-        </div>
-
-  </div>
-
-
-    <section id="games-carousel" class="games-grid horizontal-carousel" aria-label="Liste des jeux" tabindex="0">
-
-                    {% for game in games %}
-
-                    <article class="game-card">
-
-                        <div class="game-image game-{{ loop.index }}">
-                            <span>{{ game.emoji }}</span>
-                        </div>
-
-                        <div class="game-body">
-
-                            <h3>{{ game.name }}</h3>
-
-                            <p>{{ game.description }}</p>
-
-                            <span class="players">
-                                👥 {{ game.players }}
-                            </span>
-
-                            {% if game.name == "President" %}
-
-
-                                    <a
-                                        class="play-button"
-                                        href="/games/president">
-                                         Jouer maintenant →
-                                    </a>
-
-                            {% elif game.name == "UNO" %}
-
-                                <a
-                                    class="play-button"
-                                    href="/games/uno">
-                                     Jouer maintenant →
-                                </a>
-
-                            {% else %}
-
-                                <button
-                                    class="play-button disabled"
-                                    type="button"
-                                    disabled>
-                                    🔒 Bientôt disponible
-                                </button>
-
-                            {% endif %}
-
-                        </div>
-
-                    </article>
-
-                    {% endfor %}
-        </section>
-
-
-        <!-- LANGUES -->
-
-        <div class="section-title language-title">
-
-            <h2>Apprendre des langues</h2>
-
-             <div class="carousel-controls" aria-label="Navigation des langues">
-                <button type="button" class="carousel-arrow" data-scroll-target="languages-carousel" data-scroll-direction="-1" aria-label="Langues précédentes">←</button>
-                <button type="button" class="carousel-arrow" data-scroll-target="languages-carousel" data-scroll-direction="1" aria-label="Langues suivantes">→</button>
-            </div>
-
-        </div>
-
-
-        <section class="language-section">
-              <div id="languages-carousel" class="language-grid horizontal-carousel" aria-label="Liste des langues" tabindex="0">
-
-                {% for language in languages %}
-
-                <article class="language-card">
-
-                    <div class="flag">
-                        {{ language.flag }}
-                    </div>
-
-                    <strong>
-                        {{ language.name }}
-                    </strong>
-
-                    <div class="progress">
-                        <span style="width: {{ 35 + loop.index * 10 }}%"></span>
-                    </div>
-
-                    <small>
-                        {{ 1200 + loop.index * 370 }}
-                        apprenants
-                    </small>
-
-                </article>
-
-                {% endfor %}
-
-            </div>
-
-        </section>
-
-
-        <!-- BAS DASHBOARD -->
+     <!-- BAS DASHBOARD -->
 
         <section class="bottom-dashboard">
 
@@ -228,6 +118,11 @@
     <!-- COLONNE DROITE -->
 
     <aside class="rightbar lobby-social-column" aria-label="Espace social">
+        <div class="mobile-social-heading"><h2>Personnes</h2></div>
+        <div class="mobile-social-tabs" role="tablist" aria-label="Réseau social">
+            <button type="button" role="tab" id="mobile-friends-tab" aria-selected="true" data-social-tab="friends">AMIS</button>
+            <button type="button" role="tab" id="mobile-groups-tab" aria-selected="false" data-social-tab="groups">GROUPES</button>
+        </div>
         <section class="panel social-panel social-friends-panel" aria-labelledby="social-friends-title">
             <div class="panel-title"><h3 id="social-friends-title">Mes amis (<span id="friends-count">0</span>)</h3></div>
             <div id="dashboard-friends-list" class="social-panel-scroll" aria-live="polite"><p>Chargement des amis...</p></div>
@@ -242,6 +137,16 @@
         </section>
     </aside>
 </div>
+
+<!-- Navigation mobile : utilise les sections existantes, sans dupliquer les API -->
+<nav class="mobile-bottom-nav" aria-label="Navigation mobile">
+  <button type="button" class="mobile-nav-button is-active" data-mobile-view="home" aria-label="Accueil" aria-current="page" title="Accueil"><svg aria-hidden="true" viewBox="0 0 24 24" width="27" height="27" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg></button>
+  <button type="button" class="mobile-nav-button" data-mobile-view="social" aria-label="Social" title="Social">
+    <svg aria-hidden="true" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="8" r="3"/><path d="M2 20v-2a5 5 0 0 1 10 0v2H2zM12 20v-2a5 5 0 0 1 10 0v2h-7"/></svg>
+    <i id="mobile-social-notice" hidden></i>
+  </button>
+</nav>
+
 <!-- GROUPES D'AMIS -->
 <div id="group-create-modal" class="group-overlay" hidden><div class="group-dialog" role="dialog" aria-modal="true" aria-labelledby="group-create-title">
   <div class="group-dialog-head"><h2 id="group-create-title">Créer un groupe</h2><button type="button" data-close-group="group-create-modal" aria-label="Fermer">×</button></div>
@@ -410,9 +315,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 "current-username"
             );
 
-        if (username && user.username) {
+        if (username && (user.pseudo || user.username)) {
             username.textContent =
-                user.username;
+                user.pseudo || user.username;
         }
 
     } catch (error) {
@@ -647,7 +552,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     img.onerror = () => img.remove();
                     avatar.appendChild(img);
                 }
-                content.append(el("strong", friend.username || "Ami"), el("small", last.content || ""));
+                content.append(el("strong", friend.pseudo || friend.username || "Ami"), el("small", last.content || ""));
                 item.append(stamp, avatar, content);
                 if (Number(unread_count) > 0) item.appendChild(el("span", unread_count, "activity-count"));
                 item.addEventListener("click", () => {
@@ -657,7 +562,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const group = event.group;
                 const last = group.last_message || {};
                 const icon = el("span", "👥", "activity-game-icon");
-                const author = last.username ? last.username + " : " : "";
+                const author = (last.pseudo || last.username) ? (last.pseudo || last.username) + " : " : "";
                 content.append(el("strong", group.name || "Groupe d'amis"),
                                el("small", author + (last.content || "")));
                 item.append(stamp, icon, content);
@@ -671,7 +576,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const room = event.room;
                 const icon = el("span", room.game_type === "PRESIDENT" ? "👑" : "🎮", "activity-game-icon");
                 if (event.kind === "finished") {
-                    const winner = room.winner_username;
+                    const winner = (room.winner_pseudo || room.winner_username);
                     content.append(el("span", gameName(room) + (winner ? " · " + winner : ""), "activity-game-title"),
                                    el("small", "Partie terminée"));
                     // Historique consultable lorsque la page de resultats sera disponible.
@@ -683,7 +588,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     content.append(el("span", gameName(room), "activity-game-title"),
                                    el("small", room.status === "WAITING" ? "En attente · Reprendre" : "Partie en cours · Reprendre"));
                     item.addEventListener("click", () => {location.href = "/room/" + encodeURIComponent(room.code);});
-                }
+         }
                 item.append(stamp, icon, content);
             }
             fragment.appendChild(item);
@@ -739,7 +644,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     avatar.appendChild(img);
                 } else avatar.textContent = "👤";
                 const name = document.createElement("strong"); name.className = "social-request-name";
-                name.textContent = request.username || "Joueur";
+                name.textContent = request.pseudo || request.username || "Joueur";
                 const actions = document.createElement("div"); actions.className = "social-request-actions";
                 async function respond(action) {
                     reject.disabled = accept.disabled = true;

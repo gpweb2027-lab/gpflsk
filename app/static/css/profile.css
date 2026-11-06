@@ -122,3 +122,52 @@ background: linear-gradient(120deg,
 .full-profile-feedback {
 	color: #b9efca
 }
+
+
+/* Profil modernisé : identité centrée et avatar chevauchant 30 % de la bannière */
+.full-profile-banner { position:relative; height:160px; }
+.full-profile-main { padding:0 20px 20px; }
+.full-profile-identity { display:flex; flex-direction:column; align-items:center; text-align:center; }
+.full-profile-avatar-wrap { position:relative; width:100px; height:100px; margin-top:-30px; z-index:3; }
+.full-profile-avatar { margin:0; width:100px; height:100px; border:4px solid #101c35; overflow:hidden; }
+.full-profile-name { display:block; margin:3px auto 10px; padding:3px 8px!important; background:transparent!important; font-size:22px; font-weight:800; line-height:1.15; text-align:center; max-width:100%; overflow-wrap:anywhere; }
+.full-profile-name:not(:disabled),.full-profile-bio:not(:disabled) { cursor:pointer; }
+.full-profile-name:disabled,.full-profile-bio:disabled { cursor:default; opacity:1; }
+.full-profile-bio { display:block; width:min(100%,460px); min-height:56px; margin:0 auto 14px; padding:13px 16px!important; border:1px solid #574b9d!important; border-radius:14px!important; background:linear-gradient(135deg,#1e2852,#1b2148)!important; color:#e8e5ff!important; font-size:14px; font-weight:600; line-height:1.5; white-space:pre-wrap; text-align:center; overflow-wrap:anywhere; box-shadow:0 6px 18px #0002; }
+.full-profile-bio:not(:disabled):hover,.full-profile-name:not(:disabled):hover { outline:1px solid #9b80ff; }
+.full-profile-avatar-plus,.full-profile-banner-plus { position:absolute; z-index:5; display:grid; place-items:center; width:25px; height:25px; min-width:25px; min-height:25px; padding:0!important; border:1px solid #a998ff!important; border-radius:50%!important; background:#4e39ad!important; color:white; font-size:19px; font-weight:600; line-height:1; box-shadow:0 2px 8px #0007; }
+.full-profile-avatar-plus { right:0; bottom:3px; }
+.full-profile-banner-plus { right:12px; bottom:12px; }
+.full-profile-avatar-plus[hidden],.full-profile-banner-plus[hidden] { display:none!important; }
+.full-profile-close { width:29px; height:29px; right:10px; top:10px; display:grid; place-items:center; padding:0!important; border:1px solid #7181a5!important; background:#14213cdd!important; font-size:21px; line-height:1; border-radius:8px!important; }
+.full-profile-meta { justify-content:center; text-align:center; }
+.full-profile-actions { display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:10px; margin:12px 0 16px; }
+.full-profile-actions .full-profile-settings { border:1px solid #7563c8; background:#292554; }
+.full-profile-actions .full-profile-logout { border:1px solid #cc5a71; background:linear-gradient(135deg,#8d2745,#b33553); font-weight:700; }
+.full-profile-inline-input { display:block; width:100%; min-width:200px; padding:7px 10px; border:1px solid #9d87ff; border-radius:8px; background:#101936; color:#fff; font:inherit; text-align:center; resize:vertical; }
+.full-profile-bio .full-profile-inline-input { min-height:80px; }
+@media(max-width:600px) { .full-profile-banner{height:145px;} .full-profile-avatar-wrap{width:92px;height:92px;margin-top:-28px;} .full-profile-avatar{width:92px;height:92px;} .full-profile-name{font-size:20px;} .full-profile-main{padding:0 14px 18px;} .full-profile-bio{width:100%;} }
+
+/* Correctifs des interactions réelles (pas seulement la maquette) */
+.full-profile-quick-edit { width:min(100%,460px); margin:4px auto 14px; display:grid; gap:9px; }
+.full-profile-quick-edit .full-profile-inline-input { min-width:0; width:100%; min-height:42px; }
+.full-profile-quick-edit textarea.full-profile-inline-input { min-height:100px; }
+.full-profile-quick-actions { display:flex; gap:10px; justify-content:center; }
+.full-profile-quick-actions button { min-height:42px; }
+.full-profile-quick-actions .full-profile-cancel { background:#28334e; }
+.full-profile-settings { min-height:42px; }
+.full-profile-banner-plus, .full-profile-avatar-plus { cursor:pointer; }
+.full-profile-name[hidden], .full-profile-bio[hidden] { display:none!important; }
+
+/* Statistiques épurées, trois colonnes et deux séparateurs */
+.full-profile-meta { display:none!important; }
+.full-profile-stats.full-profile-stats-grid {
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
+  padding:16px 0; margin:8px 0 12px;
+  border-top:0; border-bottom:1px solid #34446a;
+}
+.full-profile-stat-item { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; min-width:0; padding:4px 6px; text-align:center; }
+.full-profile-stat-item + .full-profile-stat-item { border-left:1px solid #64718e; }
+.full-profile-stat-label { font-size:11px; font-weight:700; letter-spacing:.035em; color:#aab7d0; }
+.full-profile-stat-value { font-size:22px; line-height:1.15; color:#fff; font-weight:800; }
+@media(max-width:400px){.full-profile-stat-label{font-size:10px}.full-profile-stat-value{font-size:19px}}
