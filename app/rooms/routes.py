@@ -559,13 +559,16 @@ def my_rooms():
     winners = {}
     if finished:
         winning_rows = (
-            db.session.query(PresidentResult.room_id, User.username)
+            db.session.query(PresidentResult.room_id, User.pseudo, User.username)
             .join(User, User.id == PresidentResult.user_id)
             .filter(PresidentResult.room_id.in_([room.id for room in finished]),
                     PresidentResult.position == 1)
             .all()
         )
-        winners = {room_id: username for room_id, username in winning_rows}
+        winners = {
+            room_id: (pseudo or "").strip() or username
+            for room_id, pseudo, username in winning_rows
+        }
 
     history = []
     for room in finished:
@@ -573,7 +576,8 @@ def my_rooms():
         result = results.get(room.id)
         data["position"] = result.position if result else None
         data["players_count"] = result.players_count if result else None
-        data["winner_username"] = winners.get(room.id)
+        data["winner_username"] = winners.get(room.id)  # Compatibilite avec le frontend existant.
+        data["winner_pseudo"] = winners.get(room.id)
         history.append(data)
 
     return {
