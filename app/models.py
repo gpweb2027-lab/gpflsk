@@ -61,7 +61,7 @@ class User(db.Model):
     show_location = db.Column(db.Boolean, nullable=False, default=False)
     show_stats = db.Column(db.Boolean, nullable=False, default=True)
     show_coins = db.Column(db.Boolean, nullable=False, default=False)
-    coins = db.Column(db.Integer, nullable=False, default=0)
+    coins = db.Column(db.Integer,nullable=False,default=1000,server_default=db.text("1000"))clear
 
     def to_dict(self):
         return {
