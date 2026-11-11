@@ -1046,7 +1046,7 @@ function renderPresidentPlayers(state) {
                     !enabled
                 );
 
-                audioButton.innerHTML = `<img class="president-audio-icon" src="/static/images/president_audio_png/${enabled ? "micro_on" : "micro_off"}.png" alt="" draggable="false">`;
+                audioButton.innerHTML = `<img class="president-audio-icon" src="/static/images/audio_png/${enabled ? "micro_on" : "micro_off"}.png" alt="" draggable="false">`;
 
                 audioButton.title =
                     enabled
@@ -1072,7 +1072,7 @@ function renderPresidentPlayers(state) {
             );
             audioButton.classList.toggle("is-speaking", !muted && presidentVoice.isSpeaking(Number(player.user_id)));
 
-            audioButton.innerHTML = `<img class="president-audio-icon" src="/static/images/president_audio_png/${muted ? "speaker_off" : "speaker_on"}.png" alt="" draggable="false">`;
+            audioButton.innerHTML = `<img class="president-audio-icon" src="/static/images/audio_png/${muted ? "speaker_off" : "speaker_on"}.png" alt="" draggable="false">`;
 
             audioButton.title =
                 muted
@@ -1641,7 +1641,7 @@ const presidentVoice = (() => {
             button.classList.toggle('is-muted', !enabled);
             button.title = enabled ? 'Couper mon microphone' : 'Activer mon microphone';
             const img = button.querySelector('img');
-            if (img) img.src = `/static/images/president_audio_png/${enabled ? 'micro_on' : 'micro_off'}.png`;
+            if (img) img.src = `/static/images/audio_png/${enabled ? 'micro_on' : 'micro_off'}.png`;
         });
     }
     function isSpeaking(userId) { return speakingUsers.has(Number(userId)); }

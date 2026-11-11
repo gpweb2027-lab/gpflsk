@@ -584,3 +584,71 @@ def my_rooms():
         "active_room": active.to_dict() if active else None,
         "recent_finished": history,
     }
+
+
+@rooms_bp.get("/<int:room_id>/results")
+@jwt_required()
+def room_final_results(room_id):
+    from ..models import PresidentResult, User
+
+    user_id = int(get_jwt_identity())
+
+    room = db.session.get(GameRoom, room_id)
+    if room is None:
+        return {"error": "Salle introuvable"}, 404
+
+    if room.game_type != "PRESIDENT":
+        return {"error": "Résultats indisponibles pour ce jeu"}, 400
+
+    if room.status != "FINISHED":
+        return {"error": "La partie n'est pas terminée"}, 409
+
+    # Accès réservé aux joueurs ayant participé à cette salle.
+    participated = (
+        db.session.query(GameRoomMember.id)
+        .filter(
+            GameRoomMember.room_id == room_id,
+            GameRoomMember.user_id == user_id,
+            GameRoomMember.role == "PLAYER"
+        )
+        .first()
+    )
+
+    has_result = (
+        PresidentResult.query.filter_by(
+            room_id=room_id,
+            user_id=user_id
+        ).first() is not None
+    )
+
+    if not participated and not has_result:
+        return {"error": "Accès non autorisé"}, 403
+
+    rows = (
+        db.session.query(PresidentResult, User)
+        .join(User, User.id == PresidentResult.user_id)
+        .filter(PresidentResult.room_id == room_id)
+        .order_by(PresidentResult.position.asc(), PresidentResult.id.asc())
+        .all()
+    )
+
+    return {
+        "room_id": room.id,
+        "room_code": room.code,
+        "game_type": room.game_type,
+        "finished_at": room.finished_at.isoformat() + "Z"
+            if room.finished_at else None,
+        "players": [
+            {
+                "id": user.id,
+                "username": user.username,
+                "pseudo": user.pseudo or user.username,
+                "avatar_url": user.avatar_url,
+                "position": result.position,
+                "players_count": result.players_count,
+                "winner": result.position == 1
+            }
+            for result, user in rows
+        ]
+    }, 200
+
