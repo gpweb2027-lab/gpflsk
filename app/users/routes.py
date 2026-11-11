@@ -8,7 +8,7 @@ from flask_jwt_extended import (
 )
 
 from ..extensions import db
-from ..models import User, FriendRequest, PrivateMessage, PresidentResult
+from ..models import User, FriendRequest, PrivateMessage, PresidentResult, ShopCollection, ShopItem, UserShopItem, ShopTransaction
 from ..games.president.socket_events import is_user_online
 users_bp = Blueprint(
     "users",
@@ -130,6 +130,13 @@ def get_friend_requests():
         .all()
     )
 
+    sent_requests = (
+        FriendRequest.query
+        .filter_by(sender_id=user_id, status="PENDING")
+        .order_by(FriendRequest.created_at.desc())
+        .all()
+    )
+
     return {
         "requests": [
             {
@@ -144,6 +151,19 @@ def get_friend_requests():
                 )
             }
             for friend_request in requests
+        ],
+        "sent_requests": [
+            {
+                "id": friend_request.id,
+                "receiver_id": friend_request.receiver_id,
+                "pseudo": friend_request.receiver.pseudo or friend_request.receiver.username,
+                "avatar_url": friend_request.receiver.avatar_url,
+                "created_at": (
+                    friend_request.created_at.isoformat() + "Z"
+                    if friend_request.created_at else None
+                )
+            }
+            for friend_request in sent_requests
         ]
     }, 200
 
@@ -226,7 +246,8 @@ def get_friends():
             "username": friend.username,
             "pseudo": friend.pseudo or friend.username,
             "avatar_url": friend.avatar_url,
-            "is_online": is_user_online(friend.id)
+            "is_online": is_user_online(friend.id),
+            "last_seen_at": (getattr(friend, "last_seen_at", None).isoformat() + "Z") if getattr(friend, "last_seen_at",None) else None
         })
 
     return {
@@ -483,6 +504,7 @@ def _profile_payload(user, owner=False):
         "banner_url": user.banner_url, "bio": user.bio,
         "account_days": max(0, (datetime.now(timezone.utc).date() - user.created_at.date()).days) if user.created_at else None,
         "is_online": is_user_online(user.id), "is_owner": owner,
+        "coins": user.coins,  # Solde visible sur tous les profils
     }
     if owner:
         data["privacy"] = {"show_location": user.show_location, "show_stats": user.show_stats, "show_coins": user.show_coins}
@@ -490,9 +512,7 @@ def _profile_payload(user, owner=False):
         data["timezone"] = user.timezone
         data["coins"] = user.coins
     else:
-        if user.show_coins:
-            data["coins"] = user.coins
-        if user.show_location:
+       if user.show_location:
             if user.country_code:
                 data["country_code"] = user.country_code
             if user.timezone:
@@ -566,3 +586,254 @@ def update_profile():
 
 from ..chat_features import register_chat_routes, enrich, set_reply
 register_chat_routes(users_bp)
+
+# Catalogue et achats : l'autorisation est TOUJOURS vérifiée sur le serveur.
+from pathlib import Path
+import re
+from flask import current_app
+from sqlalchemy import UniqueConstraint
+
+class AvatarCollectionPurchase(db.Model):
+    __tablename__ = "avatar_collection_purchases"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    collection_id = db.Column(db.String(60), nullable=False)
+    __table_args__ = (UniqueConstraint("user_id", "collection_id", name="uq_avatar_collection_purchase"),)
+
+# Modifie les noms/prix ici. Le prix doit rester entre 1 et 10 coins.
+AVATAR_COLLECTIONS = {
+    "collection_a": {"name": "Gaming", "price": 3},
+    "collection_b": {"name": "Rétro", "price": 4},
+    "collection_bollywood": {"name": "Bollywood", "price": 6},
+}
+
+def _catalogue_files(collection):
+    folder = Path(current_app.static_folder) / "media" / "avatars" / collection
+    if not folder.is_dir():
+        return []
+    return sorted((p.name for p in folder.iterdir() if p.is_file() and p.suffix.lower() in (".png", ".webp", ".jpg", ".jpeg", ".gif")), key=str.lower)
+
+@users_bp.get("/profile/avatar-catalogue")
+@jwt_required()
+def list_free_avatars():
+    folder = Path(current_app.static_folder) / "images" / "avatars"
+    if not folder.is_dir():
+        return {"avatars": []}
+    avatars = [p.name for p in folder.iterdir() if p.is_file() and re.fullmatch(r"avatar[0-9]+\.png", p.name, re.I)]
+    avatars.sort(key=lambda n: int(re.search(r"[0-9]+", n).group()))
+    return {"avatars": avatars}
+
+@users_bp.get("/profile/collections")
+@jwt_required()
+def list_avatar_collections():
+    user_id = int(get_jwt_identity())
+    owned = {r.collection_id for r in AvatarCollectionPurchase.query.filter_by(user_id=user_id).all()}
+    collections=[]
+    for key, meta in AVATAR_COLLECTIONS.items():
+        files=_catalogue_files(key)
+        if not files: continue
+        collections.append({"id": key, "name": meta["name"], "price": meta["price"], "owned": key in owned,
+                            "cover_url": f"/static/media/avatars/{key}/{files[0]}", "files": files})
+    return {"collections": collections}
+
+@users_bp.post("/profile/collections/<collection_id>/buy")
+@jwt_required()
+def buy_avatar_collection(collection_id):
+    meta = AVATAR_COLLECTIONS.get(collection_id)
+    if not meta or not _catalogue_files(collection_id):
+        return {"error": "Collection introuvable"}, 404
+    price = meta["price"]
+    if not isinstance(price, int) or not 1 <= price <= 10:
+        return {"error": "Prix invalide"}, 500
+    user_id = int(get_jwt_identity())
+    try:
+        # Verrou sur PostgreSQL, opération transactionnelle pour éviter les doubles débits.
+        user = db.session.query(User).filter(User.id == user_id).with_for_update().first()
+        if user is None: return {"error": "Utilisateur introuvable"}, 404
+        existing = AvatarCollectionPurchase.query.filter_by(user_id=user_id, collection_id=collection_id).first()
+        if existing: return {"message": "Collection déjà débloquée", "coins": user.coins}, 200
+        if (user.coins or 0) < price: return {"error": "Solde de coins insuffisant"}, 409
+        user.coins -= price
+        db.session.add(AvatarCollectionPurchase(user_id=user_id, collection_id=collection_id))
+        db.session.commit()
+        return {"message": "Collection débloquée", "coins": user.coins}, 200
+    except IntegrityError:
+        db.session.rollback()
+        return {"error": "Achat déjà enregistré ; recharge la page"}, 409
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Achat collection impossible")
+        return {"error": "Impossible de terminer l'achat"}, 500
+
+@users_bp.post("/profile/me/catalogue")
+@jwt_required()
+def choose_profile_catalogue():
+    data = request.get_json(silent=True) or {}
+    kind, collection, name = data.get("kind"), data.get("collection"), data.get("filename")
+    if kind not in ("avatar", "banner") or not isinstance(collection, str) or not isinstance(name, str):
+        return {"error": "Sélection invalide"}, 400
+    if not re.fullmatch(r"[a-zA-Z0-9_-]{1,60}", collection) or not re.fullmatch(r"[a-zA-Z0-9_-]{1,80}\.(webp|png|jpg|jpeg|gif)", name, re.I):
+        return {"error": "Nom de fichier invalide"}, 400
+    if kind == "avatar" and collection == "free":
+        if not re.fullmatch(r"avatar[0-9]+\.png", name, re.I):
+            return {"error": "Avatar non autorisé"}, 403
+        root = Path(current_app.static_folder) / "images" / "avatars"
+        url = f"/static/images/avatars/{name}"
+    elif kind == "avatar":
+        if collection not in AVATAR_COLLECTIONS:
+            return {"error": "Collection non autorisée"}, 403
+        owned = AvatarCollectionPurchase.query.filter_by(user_id=int(get_jwt_identity()), collection_id=collection).first()
+        root = Path(current_app.static_folder) / "media" / "avatars" / collection
+        url = f"/static/media/avatars/{collection}/{name}"
+    else:
+        if collection not in ("collection_a", "collection_b"):
+            return {"error": "Bannière non autorisée"}, 403
+        root = Path(current_app.static_folder) / "media" / "banners" / collection
+        url = f"/static/media/banners/{collection}/{name}"
+    # Si cet article figure dans la boutique, il faut le posseder ou etre gratuit.
+    # Les anciennes collections achetees restent utilisables (compatibilite).
+    item = ShopItem.query.filter_by(image_url=url, kind=kind).first()
+    if item is not None:
+        user_id = int(get_jwt_identity())
+        owned_item = UserShopItem.query.filter_by(user_id=user_id, item_id=item.id).first()
+        legacy_owned = (kind == "avatar" and collection != "free" and
+            AvatarCollectionPurchase.query.filter_by(user_id=user_id, collection_id=collection).first() is not None)
+        if item.price_coins > 0 and not owned_item and not legacy_owned:
+            return {"error": "Article non achete"}, 403
+    elif kind == "banner":
+        # Les bannieres cataloguees sont exclusivement choisies via la boutique.
+        return {"error": "Banniere absente du catalogue"}, 403
+    elif kind == "avatar" and collection != "free":
+        legacy_owned = AvatarCollectionPurchase.query.filter_by(
+            user_id=int(get_jwt_identity()), collection_id=collection).first()
+        if not legacy_owned:
+            return {"error": "Avatar absent du catalogue"}, 403
+    candidate = root / name
+    if not candidate.is_file() or not candidate.resolve().is_relative_to(root.resolve()):
+        return {"error": "Image introuvable"}, 404
+    user = db.session.get(User, int(get_jwt_identity()))
+    if user is None: return {"error": "Utilisateur introuvable"}, 404
+    old_url = getattr(user, f"{kind}_url")
+    try:
+        setattr(user, f"{kind}_url", url)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        return {"error": "Impossible de sauvegarder"}, 500
+    prefix = f"/static/uploads/{'avatars' if kind == 'avatar' else 'banners'}/"
+    if old_url and old_url.startswith(prefix):
+        old_name = old_url[len(prefix):]
+        if Path(old_name).name == old_name:
+            (Path(current_app.static_folder) / "uploads" / ("avatars" if kind == "avatar" else "banners") / old_name).unlink(missing_ok=True)
+    return {"message": "Image sélectionnée", f"{kind}_url": url}, 200
+
+# Boutique individuelle : prix lus exclusivement en base, jamais depuis le client.
+@users_bp.get("/profile/shop")
+@jwt_required()
+def shop_catalogue():
+    uid = int(get_jwt_identity())
+    collections = ShopCollection.query.filter_by(is_active=True).order_by(ShopCollection.sort_order, ShopCollection.id).all()
+    items = (ShopItem.query.filter_by(is_active=True)
+             .order_by(ShopItem.sort_order, ShopItem.id).all())
+    owned = {row.item_id for row in UserShopItem.query.filter_by(user_id=uid).all()}
+    old_packs = {row.collection_id for row in AvatarCollectionPurchase.query.filter_by(user_id=uid).all()}
+    c_by_id = {c.id: c for c in collections}
+    result = []
+    for item in items:
+        c = c_by_id.get(item.collection_id)
+        if not c or c.kind != item.kind:
+            continue
+        legacy = item.kind == 'avatar' and (c.code in old_packs or c.code.removeprefix("avatar_") in old_packs)
+        result.append({"id": item.id, "name": item.name, "kind": item.kind,
+                       "image_url": item.image_url, "price": item.price_coins,
+                       "owned": item.id in owned or legacy or item.price_coins == 0,
+                       "collection_id": c.id, "collection_code": c.code})
+    return {"collections": [{"id": c.id, "code": c.code, "name": c.name, "kind": c.kind}
+                            for c in collections], "items": result}
+
+
+@users_bp.get("/profile/shop/mine")
+@jwt_required()
+def my_shop_items():
+    uid = int(get_jwt_identity())
+    rows = (db.session.query(ShopItem, UserShopItem.acquired_at)
+            .join(UserShopItem, UserShopItem.item_id == ShopItem.id)
+            .filter(UserShopItem.user_id == uid).all())
+    return {"items": [{"id": item.id, "name": item.name, "kind": item.kind,
+                       "image_url": item.image_url, "acquired_at": acquired.isoformat() if acquired else None}
+                      for item, acquired in rows]}
+
+
+@users_bp.post("/profile/shop/<int:item_id>/buy")
+@jwt_required()
+def buy_shop_item(item_id):
+    uid = int(get_jwt_identity())
+    try:
+        # Verrouillage du joueur : deux achats simultanes ne peuvent pas depenser les memes coins.
+        user = db.session.query(User).filter_by(id=uid).with_for_update().first()
+        if user is None:
+            return {"error": "Joueur introuvable"}, 404
+        item = db.session.get(ShopItem, item_id)
+        if item is None or not item.is_active:
+            return {"error": "Article indisponible"}, 404
+        coll = db.session.get(ShopCollection, item.collection_id)
+        if coll is None or not coll.is_active or coll.kind != item.kind:
+            return {"error": "Collection indisponible"}, 404
+        owned = UserShopItem.query.filter_by(user_id=uid, item_id=item.id).first()
+        old_pack = (item.kind == "avatar" and
+                    AvatarCollectionPurchase.query.filter_by(user_id=uid, collection_id=coll.code.removeprefix("avatar_")).first() is not None)
+        if owned or old_pack:
+            return {"message": "Deja possede", "coins": user.coins, "owned": True}, 200
+        price = item.price_coins
+        if not isinstance(price, int) or price < 0 or price > 10:
+            return {"error": "Prix invalide"}, 409
+        before = user.coins or 0
+        if before < price:
+            return {"error": "Solde de coins insuffisant"}, 409
+        user.coins = before - price
+        db.session.add(UserShopItem(user_id=uid, item_id=item.id, acquisition_type="purchase"))
+        db.session.add(ShopTransaction(user_id=uid, item_id=item.id, price_coins=price,
+                                       balance_before=before, balance_after=user.coins,
+                                       transaction_type="purchase"))
+        db.session.commit()
+        return {"message": "Achat effectue", "coins": user.coins, "owned": True}, 200
+    except IntegrityError as exc:
+        db.session.rollback()
+        current_app.logger.exception(
+            "ERREUR SQL ACHAT BOUTIQUE : %s",
+            str(exc.orig)
+        )
+        return {
+            "error": "Erreur SQL pendant l'achat. Voir le terminal Flask."
+        }, 500
+
+
+@users_bp.post("/profile/shop/<int:item_id>/equip")
+@jwt_required()
+def equip_shop_item(item_id):
+    uid = int(get_jwt_identity())
+    item = db.session.get(ShopItem, item_id)
+    if item is None or not item.is_active:
+        return {"error": "Article introuvable"}, 404
+    coll = db.session.get(ShopCollection, item.collection_id)
+    if coll is None or coll.kind != item.kind:
+        return {"error": "Collection invalide"}, 403
+    owned = UserShopItem.query.filter_by(user_id=uid, item_id=item.id).first()
+    old_pack = (item.kind == "avatar" and
+                AvatarCollectionPurchase.query.filter_by(user_id=uid, collection_id=coll.code.removeprefix("avatar_")).first() is not None)
+    if item.price_coins > 0 and not owned and not old_pack:
+        return {"error": "Article non possede"}, 403
+    # Ne jamais faire confiance a une URL envoyee par le navigateur.
+    url = item.image_url
+    if not url.startswith('/static/') or '..' in url or not (Path(current_app.static_folder) / url[len('/static/'):]).is_file():
+        return {"error": "Fichier image introuvable"}, 404
+    user = db.session.get(User, uid)
+    if user is None:
+        return {"error": "Joueur introuvable"}, 404
+    setattr(user, 'avatar_url' if item.kind == 'avatar' else 'banner_url', url)
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        return {"error": "Impossible d'appliquer l'image"}, 500
+    return {"message": "Image appliquee", "kind": item.kind, "image_url": url}

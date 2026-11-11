@@ -384,6 +384,39 @@ function initFriendsModal() {
                 const username = document.createElement("strong");
                 username.textContent = (friendRequest.pseudo || friendRequest.username);
 
+                 // Ouvrir le profil de l'expéditeur sans accepter la demande.
+                const openRequesterProfile = () => {
+                    const playerId = Number(friendRequest.sender_id);
+                    if (!Number.isInteger(playerId) || playerId <= 0) return;
+                    if (typeof window.openFullPlayerProfile === "function") {
+                        window.openFullPlayerProfile(playerId);
+                    } else if (typeof showToast === "function") {
+                        showToast("Le profil du joueur n'est pas disponible.");
+                    }
+                };
+                avatar.dataset.friendId = String(friendRequest.sender_id);
+                avatar.setAttribute("role", "button");
+                avatar.setAttribute("tabindex", "0");
+                avatar.setAttribute("aria-label", "Voir le profil de " + username.textContent);
+                avatar.style.cursor = "pointer";
+                avatar.addEventListener("click", openRequesterProfile);
+                avatar.addEventListener("keydown", event => {
+                    if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        openRequesterProfile();
+                    }
+                });
+                username.setAttribute("role", "button");
+                username.setAttribute("tabindex", "0");
+                username.style.cursor = "pointer";
+                username.addEventListener("click", openRequesterProfile);
+                username.addEventListener("keydown", event => {
+                    if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        openRequesterProfile();
+                    }
+                });
+
                 const info = document.createElement("div");
                 info.className = "friend-request-info";
                 info.appendChild(username);
@@ -737,12 +770,31 @@ function setupPrivateChatHeader(friend) {
     subtitle.append(dot, document.createTextNode(friend.is_online ? " En ligne" : " Hors ligne"));
     const lastSeen = document.createElement("small");
     lastSeen.className = "chat-last-seen";
-    lastSeen.textContent = friend.last_seen_at
-        ? "Dernière connexion : " + new Date(friend.last_seen_at).toLocaleString("fr-FR")
-        : "Dernière connexion indisponible";
+    const lastSeenDate = friend.last_seen_at ? new Date(friend.last_seen_at) : null;
+    lastSeen.textContent = friend.is_online
+        ? "Connecté actuellement"
+        : lastSeenDate && !Number.isNaN(lastSeenDate.getTime())
+            ? "Dernière connexion : " + lastSeenDate.toLocaleString("fr-FR")
+            : "Dernière connexion non enregistrée";
     labels.append(name, subtitle, lastSeen);
     profile.append(avatar, labels);
     title.appendChild(profile);
+
+    // Retour placé à gauche de l'avatar, hors du bouton profil.
+    let backButton = title.querySelector('.private-chat-back');
+    if (!backButton) {
+        backButton = document.createElement('button');
+        backButton.type = 'button';
+        backButton.className = 'private-chat-back';
+        backButton.textContent = '←';
+        backButton.title = 'Retour aux amis';
+        backButton.setAttribute('aria-label', 'Retour aux amis');
+        backButton.addEventListener('click', event => {
+            event.stopPropagation();
+            document.getElementById('private-chat-close')?.click();
+        });
+    }
+    title.prepend(backButton);
 
     let menuButton = header.querySelector(".chat-more-button");
     if (!menuButton) {
@@ -807,6 +859,18 @@ async function openPrivateChat(friend) {
 
     if (!modal || !title || !messages || !input) return;
 
+    // Recharger la présence depuis l'API plutôt que depuis une ancienne liste.
+    try {
+        const presenceResponse = await fetch('/api/users/friends', {
+            headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
+            cache: 'no-store'
+        });
+        if (presenceResponse.ok) {
+            const presenceData = await presenceResponse.json();
+            const currentFriend = (presenceData.friends || []).find(f => Number(f.id) === Number(friend.id));
+            if (currentFriend) friend = { ...friend, ...currentFriend };
+        }
+    } catch (error) { console.warn('Présence indisponible', error); }
     setupPrivateChatHeader(friend);
     modal.dataset.friendId = String(friend.id);
     modal.dataset.friendName = (friend.pseudo || friend.username) || "Joueur";
@@ -816,7 +880,12 @@ async function openPrivateChat(friend) {
     modal.hidden = false;
     messages.textContent = "Chargement des messages...";
 
-    input.focus();
+    // Ne pas sélectionner le champ à l'ouverture, même si le HTML a autofocus.
+    input.removeAttribute('autofocus');
+    if (document.activeElement === input) input.blur();
+    requestAnimationFrame(() => {
+        if (!modal.hidden && document.activeElement === input) input.blur();
+    });
 
     try {
         const response = await fetch(
@@ -1144,6 +1213,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const slot = document.getElementById("mobile-activity-slot");
     const layout = document.querySelector(".app-layout");
     const mobile = window.matchMedia("(max-width: 760px)");
+    const brand = document.querySelector(".lobby-topbar .lobby-brand");
+
+    function updateBrand() {
+        if (!brand) return;
+        const isPeople = mobile.matches && document.body.dataset.mobileView === "social";
+        brand.textContent = isPeople ? "Personnes" : "Game Platform";
+        brand.setAttribute("aria-label", isPeople ? "Personnes, retour à l’accueil" : "Game Platform, accueil");
+    }
 
     function placeActivity() {
         if (!sidebar || !slot || !layout) return;
@@ -1163,6 +1240,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (active) button.setAttribute("aria-current", "page");
             else button.removeAttribute("aria-current");
         });
+        updateBrand();
         window.scrollTo({top: 0, behavior: "instant"});
     }
 
@@ -1174,8 +1252,92 @@ document.addEventListener("DOMContentLoaded", () => {
 
     buttons.forEach(button => button.addEventListener("click", () => showView(button.dataset.mobileView)));
     tabs.forEach(button => button.addEventListener("click", () => showSocialTab(button.dataset.socialTab)));
-    mobile.addEventListener("change", placeActivity);
+    mobile.addEventListener("change", () => { placeActivity(); updateBrand(); });
     placeActivity();
     showSocialTab("friends");
     showView("home");
+});
+
+
+
+// Synchronisation immédiate de l'avatar personnel après changement dans le profil.
+// N'affecte pas les avatars des amis.
+window.addEventListener('profile-avatar-updated', (event) => {
+    const url = event.detail?.avatar_url;
+    if (typeof url !== 'string' || !url.startsWith('/static/')) return;
+
+    const header = document.getElementById('header-avatar-btn');
+    if (header) {
+        let img = header.matches('img') ? header : header.querySelector('img');
+        if (!img) {
+            img = document.createElement('img');
+            img.alt = 'Mon avatar';
+            header.replaceChildren(img);
+        }
+        img.src = url;
+    }
+
+    // Les conversations ouvertes peuvent déjà contenir des messages du joueur.
+    // On ne modifie que leurs avatars, identifiés par is-mine.
+    document.querySelectorAll('.private-chat-row.is-mine .private-chat-avatar img')
+        .forEach(img => { img.src = url; });
+});
+
+
+// Pont public pour la règle 3 du profil : réutilise la messagerie privée existante.
+window.openPrivateChat = openPrivateChat;
+window.loadDashboardFriends = loadDashboardFriends;
+
+// Espace Personnes : interactions spécifiques au mobile uniquement.
+document.addEventListener("DOMContentLoaded", () => {
+    const mobile = window.matchMedia("(max-width:760px)");
+    const list = document.getElementById("dashboard-friends-list");
+    const counter = document.getElementById("friends-count");
+    const mobileCounter = document.getElementById("mobile-friends-count");
+    const requestsCount = document.getElementById("social-requests-count");
+    const badge = document.getElementById("mobile-requests-badge");
+    const toggle = document.getElementById("mobile-requests-toggle");
+    const add = document.getElementById("mobile-add-friend");
+    const share = document.getElementById("mobile-share-friend");
+    if (!list || !toggle) return;
+
+    const sync = () => {
+        if (mobileCounter && counter) mobileCounter.textContent = counter.textContent;
+        const n = Number(requestsCount?.textContent) || 0;
+        if (badge) { badge.textContent = n > 99 ? "99+" : String(n); badge.hidden = n === 0; }
+        const notice = document.getElementById("mobile-social-notice");
+        if (notice) notice.hidden = n === 0;
+    };
+    const observer = new MutationObserver(sync);
+    if (counter) observer.observe(counter, {childList:true, characterData:true, subtree:true});
+    if (requestsCount) observer.observe(requestsCount, {childList:true, characterData:true, subtree:true});
+    sync();
+
+    toggle.addEventListener("click", () => {
+        const expanded = toggle.getAttribute("aria-expanded") !== "true";
+        toggle.setAttribute("aria-expanded", String(expanded));
+        document.body.classList.toggle("mobile-requests-expanded", expanded);
+        if (expanded) window.refreshLobbyFriendRequests?.();
+    });
+    list.addEventListener("click", event => {
+        if (!mobile.matches || event.target.closest(".friend-message-btn")) return;
+        const row = event.target.closest(".friend");
+        const id = Number(row?.querySelector(".friend-avatar[data-friend-id]")?.dataset.friendId);
+        if (id > 0) window.openFullPlayerProfile?.(id);
+    });
+    add?.addEventListener("click", () => {
+        // L'ajout d'amis s'effectue actuellement depuis le profil d'un joueur.
+        if (typeof showToast === "function") showToast("Ouvre le profil d'un joueur pour l'ajouter en ami.");
+        else alert("Ouvre le profil d'un joueur pour l'ajouter en ami.");
+    });
+    share?.addEventListener("click", async () => {
+        // Partage de l'adresse de la plateforme, sans inventer de lien d'invitation API.
+        const url = new URL("/lobby", location.origin).href;
+        try {
+            if (navigator.share) await navigator.share({title:"Game Platform", url});
+            else { await navigator.clipboard.writeText(url); if (typeof showToast === "function") showToast("Lien copié !"); }
+        } catch (error) {
+            if (error.name !== "AbortError" && typeof showToast === "function") showToast("Impossible de partager le lien.");
+        }
+    });
 });

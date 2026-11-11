@@ -166,96 +166,102 @@ def refresh_access_token():
     return {"access_token": create_access_token(identity=str(user_id))}
 
 
-@auth_bp.post("/avatar")
-@jwt_required()
-def upload_avatar():
-    """Upload d'avatar, réponse JSON y compris en cas d'erreur."""
-    from pathlib import Path
-    from uuid import uuid4
-    from flask import current_app
 
+# Gestion locale des images de profil. Pillow : pip install Pillow
+from io import BytesIO
+from pathlib import Path
+from uuid import uuid4
+from flask import current_app
+from PIL import Image, ImageOps, ImageSequence, UnidentifiedImageError
+
+MAX_SOURCE_BYTES = 20 * 1024 * 1024
+Image.MAX_IMAGE_PIXELS = 25_000_000
+
+
+def _prepare_media(uploaded, kind):
+    raw = uploaded.read(MAX_SOURCE_BYTES + 1)
+    if not raw or len(raw) > MAX_SOURCE_BYTES:
+        raise ValueError("Fichier vide ou supérieur à 20 Mo")
+    try:
+        image = Image.open(BytesIO(raw))
+        if image.format not in ("JPEG", "PNG", "WEBP", "GIF"):
+            raise ValueError("Format accepté : JPG, PNG, WebP ou GIF")
+        if image.width * image.height > 25_000_000:
+            raise ValueError("Dimensions trop importantes")
+        animated = getattr(image, "is_animated", False) and getattr(image, "n_frames", 1) > 1
+        if animated:
+            if image.n_frames > 120:
+                raise ValueError("GIF trop long : 120 images maximum")
+            limit = (256, 256) if kind == "avatar" else (800, 300)
+            frames, durations = [], []
+            total_ms = 0
+            for frame in ImageSequence.Iterator(image):
+                duration = max(40, min(1000, int(frame.info.get("duration", 100) or 100)))
+                total_ms += duration
+                if total_ms > 15000:
+                    raise ValueError("Animation limitée à 15 secondes")
+                rgb = frame.convert("RGBA")
+                rgb.thumbnail(limit, Image.Resampling.LANCZOS)
+                frames.append(rgb)
+                durations.append(duration)
+            out = BytesIO()
+            frames[0].save(out, format="WEBP", save_all=True, append_images=frames[1:],
+                           duration=durations, loop=0, quality=65, method=4)
+            if out.tell() > 4 * 1024 * 1024:
+                raise ValueError("Animation encore trop lourde après compression (4 Mo maximum)")
+            return out.getvalue(), "webp"
+        image = ImageOps.exif_transpose(image)
+        limit = (512, 512) if kind == "avatar" else (1600, 600)
+        image.thumbnail(limit, Image.Resampling.LANCZOS)
+        image = image.convert("RGBA") if "A" in image.getbands() else image.convert("RGB")
+        out = BytesIO()
+        image.save(out, format="WEBP", quality=80, method=6)
+        return out.getvalue(), "webp"
+    except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError) as exc:
+        raise ValueError(str(exc) or "Image invalide") from exc
+
+def _store_profile_upload(kind):
     user = db.session.get(User, int(get_jwt_identity()))
     if user is None:
         return {"error": "Utilisateur introuvable"}, 404
-    uploaded = request.files.get("avatar")
+    uploaded = request.files.get(kind)
     if uploaded is None or not uploaded.filename:
         return {"error": "Sélectionne une image"}, 400
-
-    # Vérifier taille et signature réelle du fichier, pas uniquement son extension.
-    raw = uploaded.read(5 * 1024 * 1024 + 1)
-    if not raw or len(raw) > 5 * 1024 * 1024:
-        return {"error": "Image vide ou supérieure à 5 Mo"}, 400
-    if raw.startswith(b"\xff\xd8\xff"):
-        ext = "jpg"
-    elif raw.startswith(b"\x89PNG\r\n\x1a\n"):
-        ext = "png"
-    elif raw.startswith(b"RIFF") and raw[8:12] == b"WEBP":
-        ext = "webp"
-    else:
-        return {"error": "Format invalide : JPG, PNG ou WEBP uniquement"}, 400
-
-    static_folder = current_app.static_folder
-    if not static_folder:
-        return {"error": "Dossier static introuvable"}, 500
-    directory = Path(static_folder) / "uploads" / "avatars"
-    filename = f"{uuid4().hex}.{ext}"
-    path = directory / filename
     try:
-        directory.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(raw)
-        user.avatar_url = f"/static/uploads/avatars/{filename}"
+        content, extension = _prepare_media(uploaded, kind)
+    except ValueError as exc:
+        return {"error": str(exc)}, 400
+    root = Path(current_app.static_folder)
+    folder = root / "uploads" / ("avatars" if kind == "avatar" else "banners")
+    path = folder / f"{uuid4().hex}.{extension}"
+    old_url = getattr(user, f"{kind}_url")
+    try:
+        folder.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content)
+        url = f"/static/uploads/{'avatars' if kind == 'avatar' else 'banners'}/{path.name}"
+        setattr(user, f"{kind}_url", url)
         db.session.commit()
     except Exception:
         db.session.rollback()
         path.unlink(missing_ok=True)
-        current_app.logger.exception("Échec de l'enregistrement de l'avatar")
-        return {"error": "Impossible d'enregistrer la photo"}, 500
-    return {"message": "Photo mise à jour", "user": user.to_dict()}, 200
+        current_app.logger.exception("Erreur enregistrement image profil")
+        return {"error": "Enregistrement impossible"}, 500
+    # Ne supprimer que nos propres anciens fichiers, jamais ceux du catalogue.
+    allowed_prefix = f"/static/uploads/{'avatars' if kind == 'avatar' else 'banners'}/"
+    if old_url and old_url.startswith(allowed_prefix):
+        old_name = old_url[len(allowed_prefix):]
+        if old_name and Path(old_name).name == old_name:
+            (folder / old_name).unlink(missing_ok=True)
+    return {"message": "Image mise à jour", f"{kind}_url": url, "user": user.to_dict()}, 200
+
+
+@auth_bp.post("/avatar")
+@jwt_required()
+def upload_avatar():
+    return _store_profile_upload("avatar")
+
 
 @auth_bp.post("/banner")
 @jwt_required()
 def upload_banner():
-    """Enregistre la bannière du profil et renvoie toujours du JSON."""
-    from pathlib import Path
-    from uuid import uuid4
-    from flask import current_app
-
-    user = db.session.get(User, int(get_jwt_identity()))
-    if user is None:
-        return {"error": "Utilisateur introuvable"}, 404
-
-    uploaded = request.files.get("banner")
-    if uploaded is None or not uploaded.filename:
-        return {"error": "Sélectionne une bannière"}, 400
-
-    raw = uploaded.read(5 * 1024 * 1024 + 1)
-    if not raw or len(raw) > 5 * 1024 * 1024:
-        return {"error": "Image vide ou supérieure à 5 Mo"}, 400
-
-    if raw.startswith(b"\xff\xd8\xff"):
-        ext = "jpg"
-    elif raw.startswith(b"\x89PNG\r\n\x1a\n"):
-        ext = "png"
-    elif raw.startswith(b"RIFF") and raw[8:12] == b"WEBP":
-        ext = "webp"
-    else:
-        return {"error": "Format invalide : JPG, PNG ou WEBP uniquement"}, 400
-
-    if not current_app.static_folder:
-        return {"error": "Dossier static introuvable"}, 500
-
-    directory = Path(current_app.static_folder) / "uploads" / "banners"
-    filename = f"{uuid4().hex}.{ext}"
-    path = directory / filename
-    try:
-        directory.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(raw)
-        user.banner_url = f"/static/uploads/banners/{filename}"
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-        path.unlink(missing_ok=True)
-        current_app.logger.exception("Échec de l'enregistrement de la bannière")
-        return {"error": "Impossible d'enregistrer la bannière"}, 500
-
-    return {"message": "Bannière mise à jour", "banner_url": user.banner_url}, 200
+    return _store_profile_upload("banner")

@@ -1,9 +1,11 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, current_app, url_for
+from pathlib import Path
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import or_, and_
 from ..extensions import db, socketio
 from ..models import User, FriendRequest, FriendGroup, FriendGroupMember, FriendGroupMessage
 from ..chat_features import enrich, set_reply
+from ..games.president.socket_events import is_user_online
 
 groups_bp = Blueprint("groups", __name__, url_prefix="/api/groups")
 
@@ -18,11 +20,23 @@ def is_friend(a, b):
         and_(FriendRequest.sender_id == a, FriendRequest.receiver_id == b),
         and_(FriendRequest.sender_id == b, FriendRequest.receiver_id == a))).first() is not None
 
+def group_avatar_url(group):
+    """Resolve the persisted catalogue ID to a public URL for every member."""
+    if not group.avatar_item_id:
+        return None
+    folder = Path(current_app.static_folder) / 'media' / 'groupes' / 'collection_a'
+    files = sorted(folder.glob('*.png'))[:50]
+    index = group.avatar_item_id - 1
+    if 0 <= index < len(files):
+        return url_for('static', filename='media/groupes/collection_a/' + files[index].name)
+    return None
+
 def serialize(group, user_id):
     members = FriendGroupMember.query.filter_by(group_id=group.id).all()
     last = FriendGroupMessage.query.filter_by(group_id=group.id).order_by(FriendGroupMessage.id.desc()).first()
-    return {"id": group.id, "name": group.name, "owner_id": group.owner_id,
-            "members": [{"id": m.user_id, "username": m.user.username,"pseudo": m.user.pseudo or m.user.username, "avatar_url": m.user.avatar_url} for m in members],
+    return {"id": group.id, "name": group.name, "owner_id": group.owner_id, "avatar_url": group_avatar_url(group),
+            "avatar_item_id": group.avatar_item_id, "description": group.description,
+            "members": [{"id": m.user_id, "username": m.user.username,"pseudo": m.user.pseudo or m.user.username, "avatar_url": m.user.avatar_url, "is_online": bool(is_user_online(m.user_id))} for m in members],
             "last_message": last.to_dict() if last else None}
 
 @groups_bp.get("")

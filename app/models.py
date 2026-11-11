@@ -1,5 +1,6 @@
 from datetime import datetime
 from .extensions import db
+from datetime import datetime, timezone
 
 
 class User(db.Model):
@@ -439,6 +440,8 @@ class FriendGroup(db.Model):
     name = db.Column(db.String(80), nullable=False)
     owner_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    avatar_item_id = db.Column(db.Integer, nullable=True)
+    description = db.Column(db.String(300), nullable=True)
     owner = db.relationship("User")
 
 class FriendGroupMember(db.Model):
@@ -480,3 +483,55 @@ class ChatReaction(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     emoji = db.Column(db.String(16), nullable=False)
     __table_args__ = (db.UniqueConstraint("kind", "message_id", "user_id", "emoji", name="uq_chat_reaction"),)
+
+# Boutique : tables deja creees par catalogue_gpflsk_local.sql
+class ShopCollection(db.Model):
+    __tablename__ = "shop_collections"
+    id = db.Column(db.BigInteger, primary_key=True)
+    code = db.Column(db.String(60), unique=True, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    kind = db.Column(db.String(12), nullable=False)
+    description = db.Column(db.Text)
+    sort_order = db.Column(db.Integer, nullable=False, default=0)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
+    created_at = db.Column(db.DateTime(timezone=True))
+
+class ShopItem(db.Model):
+    __tablename__ = "shop_items"
+    id = db.Column(db.BigInteger, primary_key=True)
+    collection_id = db.Column(db.BigInteger, db.ForeignKey("shop_collections.id"))
+    code = db.Column(db.String(100), unique=True, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    kind = db.Column(db.String(12), nullable=False)
+    image_url = db.Column(db.String(500), nullable=False)
+    price_coins = db.Column(db.Integer, nullable=False)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
+    sort_order = db.Column(db.Integer, nullable=False, default=0)
+    created_at = db.Column(db.DateTime(timezone=True))
+    collection = db.relationship("ShopCollection")
+
+class UserShopItem(db.Model):
+    __tablename__ = "user_shop_items"
+    id = db.Column(db.BigInteger, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    item_id = db.Column(db.BigInteger, db.ForeignKey("shop_items.id"), nullable=False)
+    acquired_at = db.Column(
+        db.DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc)
+    )
+    acquisition_type = db.Column(db.String(16), nullable=False, default="purchase")
+    __table_args__ = (db.UniqueConstraint("user_id", "item_id"),)
+
+class ShopTransaction(db.Model):
+    __tablename__ = "shop_transactions"
+    id = db.Column(db.BigInteger, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    item_id = db.Column(db.BigInteger, db.ForeignKey("shop_items.id"), nullable=False)
+    price_coins = db.Column(db.Integer, nullable=False)
+    balance_before = db.Column(db.Integer, nullable=False)
+    balance_after = db.Column(db.Integer, nullable=False)
+    transaction_type = db.Column(db.String(16), nullable=False, default="purchase")
+    recipient_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    created_at = db.Column(db.DateTime(timezone=True),nullable=False,default=lambda: datetime.now(timezone.utc))
+

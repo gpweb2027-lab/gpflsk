@@ -22,6 +22,196 @@
 }
 </style>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chat-common.css') }}">
+<style id="gp-activity-group-avatar-style">
+/* Avatar des groupes dans les conversations récentes (colonne gauche). */
+#activity-inbox .gp-activity-group-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+}
+#activity-inbox .gp-activity-group-avatar img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+}
+</style>
+<style id="gp-group-fixes">
+/* Fenêtres de groupe : palette cohérente avec GPFlsk */
+#group-chat-modal .group-chat-dialog{position:relative;background:#08152d;color:#edf3ff;border:1px solid #30456e;overflow:hidden}
+#group-chat-modal .group-dialog-head{background:#101f3d;color:#fff;display:flex;align-items:center;gap:12px;min-height:72px;padding:12px 16px;border-bottom:1px solid #30456e}
+#group-chat-modal .group-dialog-head>button{color:#f1f5ff;cursor:pointer}
+#group-chat-modal .gp-group-heading{flex:1;min-width:0}
+#group-chat-modal .gp-header-avatar-button{width:42px;height:42px;min-width:42px;display:grid;place-items:center;border:1px solid #455c8b;border-radius:50%;background:#20365c;color:#fff;overflow:hidden;padding:0;cursor:pointer}
+#group-chat-modal .gp-header-avatar-button img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+#group-chat-modal .gp-group-tabs{background:#101b32;border-bottom:1px solid #31476f}
+#group-chat-modal .gp-group-tabs button{color:#bdc9e6;cursor:pointer}
+#group-chat-modal .gp-group-tabs button.active{color:#83baff;border-bottom:2px solid #4d8fff}
+#group-chat-modal .group-chat-messages{background:#08152d;color:#e7efff;min-height:0}
+#group-chat-modal .group-chat-form{background:#101f3d;border-top:1px solid #30456e}
+#group-chat-modal .group-chat-form input{background:#1a2a49;color:#fff;border:1px solid #4488db}
+#group-chat-modal .group-chat-form button{color:#b8d3ff;cursor:pointer}
+#group-chat-modal .group-chat-avatar,#group-chat-modal .group-chat-meta strong{cursor:pointer}
+#group-chat-modal .group-chat-avatar:focus-visible,#group-chat-modal .group-chat-meta strong:focus-visible{outline:2px solid #74aeff;outline-offset:3px}
+#group-chat-modal .gp-group-menu{position:absolute;top:68px;right:16px;z-index:30;min-width:230px;max-width:calc(100% - 32px);background:#172744;border:1px solid #405781;border-radius:12px;padding:6px;box-shadow:0 12px 32px #0009}
+#group-chat-modal .gp-group-menu[hidden]{display:none!important}
+#group-chat-modal .gp-group-menu button{display:block;width:100%;text-align:left;padding:12px 14px;background:transparent;color:#edf3ff;border:0;border-radius:8px;cursor:pointer}
+#group-chat-modal .gp-group-menu button:hover{background:#294371}
+#group-chat-modal .group-chat-actions[hidden]{display:none!important}
+#group-details-modal .gp-details-dialog,#group-avatar-modal .gp-shop-dialog{background:#101e39;color:#eff4ff;border:1px solid #405781}
+#group-details-modal .gp-member{cursor:pointer}
+#group-details-avatar-button{display:flex;flex-direction:column;align-items:center;gap:8px;margin:12px auto;background:transparent;border:0;color:#b8d3ff;cursor:pointer;pointer-events:auto}
+#group-details-avatar-button:hover small{color:#fff;text-decoration:underline}
+#group-details-avatar-button:focus-visible{outline:2px solid #74aeff;outline-offset:4px}
+#group-avatar-grid button{cursor:pointer}
+
+/* Un seul onglet occupe l'ensemble de l'espace sous la navigation. */
+#group-chat-modal .group-chat-dialog{display:flex!important;flex-direction:column!important;height:min(760px,calc(100dvh - 24px));max-height:calc(100dvh - 24px);min-height:0}
+#group-chat-modal .group-dialog-head,#group-chat-modal .gp-group-tabs{flex:0 0 auto}
+#group-chat-modal .gp-group-workspace{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden;background:#08152d}
+#group-chat-modal .gp-group-view{flex:1 1 auto;min-height:0;width:100%;overflow-y:auto;background:#08152d}
+#group-chat-modal #group-discussion-panel{display:flex;flex-direction:column;overflow:hidden;padding:0}
+#group-chat-modal #group-chat-messages{flex:1 1 auto;min-height:0;overflow-y:auto}
+#group-chat-modal #group-chat-form{flex:0 0 auto}
+#group-chat-modal #group-games-panel,#group-chat-modal #group-online-panel{height:100%;max-height:100%;overflow-y:auto;padding:14px 18px}
+#group-chat-modal .gp-group-view[hidden],#group-chat-modal #group-chat-form[hidden],#group-chat-modal #group-chat-messages[hidden]{display:none!important}
+@media (max-width: 760px) {
+    #group-chat-modal .group-chat-dialog {
+        height: calc(100dvh - 12px);
+        max-height: calc(100dvh - 12px);
+    }
+}
+
+/* Point vert juste avant le pseudo */
+#group-chat-modal #group-online-panel .gp-online-dot,
+#group-chat-modal #group-online-panel .room-presence-dot {
+    order: 0;
+    margin-left: 0 !important;
+    margin-right: 7px;
+    width: 9px;
+    height: 9px;
+    min-width: 9px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 8px rgba(34, 197, 94, .65);
+}
+
+/* Avatar toujours en première position */
+#group-chat-modal #group-online-panel img {
+    order: -1;
+}
+
+
+/* EN LIGNE : liste sans rectangles gris */
+#group-chat-modal #group-online-panel {
+    background: #08152d;
+    padding: 16px 18px;
+}
+
+#group-chat-modal #group-online-panel button,
+#group-chat-modal #group-online-panel .gp-member {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 6px;
+    margin: 0;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: #edf3ff !important;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+#group-chat-modal #group-online-panel button:hover,
+#group-chat-modal #group-online-panel .gp-member:hover {
+    background: rgba(75, 130, 210, .08) !important;
+    border-radius: 10px;
+}
+
+/* Avatar rond */
+#group-chat-modal #group-online-panel img {
+    width: 38px;
+    height: 38px;
+    object-fit: cover;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Point vert avant le pseudo */
+#group-chat-modal #group-online-panel .gp-online-dot,
+#group-chat-modal #group-online-panel .room-presence-dot {
+    order: 0;
+    margin: 0 !important;
+    width: 9px;
+    height: 9px;
+    min-width: 9px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 8px rgba(34,197,94,.6);
+}
+
+
+
+/* EN LIGNE : avatar, point vert, couronne du créateur, pseudo. */
+#group-chat-modal #group-online-panel .group-online-member {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+#group-chat-modal #group-online-panel .group-online-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+#group-chat-modal #group-online-panel .gp-online-identity {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+#group-chat-modal #group-online-panel .group-online-dot {
+    display: inline-block;
+    flex: 0 0 9px;
+    width: 9px;
+    height: 9px;
+    margin: 0 !important;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 8px rgba(34,197,94,.65);
+}
+#group-chat-modal #group-online-panel .gp-online-crown {
+    flex: 0 0 auto;
+    font-size: 17px;
+    line-height: 1;
+}
+#group-chat-modal #group-online-panel .gp-online-pseudo {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #edf3ff;
+}
+
+</style>
 </head>
 
 <body>
@@ -123,11 +313,17 @@
             <button type="button" role="tab" id="mobile-friends-tab" aria-selected="true" data-social-tab="friends">AMIS</button>
             <button type="button" role="tab" id="mobile-groups-tab" aria-selected="false" data-social-tab="groups">GROUPES</button>
         </div>
+        <div class="mobile-friend-actions" aria-label="Actions amis">
+          <button type="button" id="mobile-add-friend"><span class="mobile-action-icon">♧</span><span>Ajouter un ami</span></button>
+          <button type="button" id="mobile-share-friend"><span class="mobile-action-icon">🔗</span><span>Partager le lien Ami</span></button>
+          <button type="button" id="mobile-requests-toggle" aria-expanded="false" aria-controls="social-requests-panel"><span class="mobile-action-icon">♙</span><span>Demandes d'amis</span><span id="mobile-requests-badge" class="mobile-requests-badge" hidden>0</span></button>
+        </div>
+        <div class="mobile-friends-label">AMIS (<span id="mobile-friends-count">0</span>)</div>
         <section class="panel social-panel social-friends-panel" aria-labelledby="social-friends-title">
             <div class="panel-title"><h3 id="social-friends-title">Mes amis (<span id="friends-count">0</span>)</h3></div>
             <div id="dashboard-friends-list" class="social-panel-scroll" aria-live="polite"><p>Chargement des amis...</p></div>
         </section>
-        <section class="panel social-panel social-requests-panel" aria-labelledby="social-requests-title">
+        <section class="panel social-panel social-requests-panel" id="social-requests-panel" aria-labelledby="social-requests-title">
             <div class="panel-title"><h3 id="social-requests-title">Demandes d'amis (<span id="social-requests-count">0</span>)</h3></div>
             <div id="social-friend-requests-list" class="social-panel-scroll" aria-live="polite"><p>Chargement des demandes...</p></div>
         </section>
@@ -155,15 +351,25 @@
   <button type="submit" class="group-primary">Créer le groupe</button></form>
 </div></div>
 <div id="group-chat-modal" class="group-overlay" hidden><div class="group-dialog group-chat-dialog" role="dialog" aria-modal="true" aria-labelledby="group-chat-title">
-  <div class="group-dialog-head"><div><h2 id="group-chat-title">Groupe</h2><small id="group-chat-members"></small></div><button type="button" data-close-group="group-chat-modal" aria-label="Fermer">×</button></div>
-  <div class="group-chat-actions"><button type="button" id="group-add-friend">+ Ajouter un ami</button><button type="button" id="group-leave">Quitter le groupe</button><button type="button" id="group-delete" hidden>Supprimer le groupe</button></div>
-  <div id="group-chat-messages" class="group-chat-messages" aria-live="polite"></div>
-  <form id="group-chat-form" class="group-chat-form"><input id="group-chat-input" maxlength="2000" placeholder="Écrire au groupe..." required autocomplete="off"><button type="submit">Envoyer</button></form>
+  <div class="group-dialog-head"><button type="button" id="group-back" aria-label="Retour">←</button><button type="button" id="group-header-avatar-button" class="gp-header-avatar-button" aria-label="Voir les détails du groupe"><img id="group-header-avatar" class="gp-avatar" alt="Avatar du groupe" hidden><span id="group-header-avatar-fallback">👥</span></button><div class="gp-group-heading"><h2 id="group-chat-title">Groupe</h2><small id="group-chat-members"></small></div><button type="button" id="group-menu-toggle" aria-label="Menu du groupe">⋮</button></div>
+  <div id="group-menu" class="gp-group-menu" hidden><button type="button" id="group-details-open">Détails du groupe</button><button type="button" id="group-menu-invite">Inviter de nouveaux membres</button><button type="button" id="group-menu-link">Invitation au groupe via un lien</button><button type="button" id="group-menu-silent">Mettre les notifications en mode silence</button><button type="button" id="group-menu-leave">Quitter le groupe</button><button type="button" id="group-menu-delete" hidden>Supprimer le groupe</button></div>
+  <div class="gp-group-tabs"><button type="button" data-group-tab="discussion" class="active">DISCUSSION</button><button type="button" data-group-tab="games">JEUX</button><button type="button" data-group-tab="online">EN LIGNE</button></div>
+   <div class="gp-group-workspace">
+     <section id="group-discussion-panel" class="gp-group-view" aria-label="Discussion">
+       <div id="group-chat-messages" class="group-chat-messages" aria-live="polite"></div>
+       <form id="group-chat-form" class="group-chat-form"><input id="group-chat-input" maxlength="2000" placeholder="Écrire au groupe..." required autocomplete="off"><button type="submit">Envoyer</button></form>
+     </section>
+     <section id="group-games-panel" class="gp-group-view gp-group-panel" aria-label="Jeux" hidden></section>
+     <section id="group-online-panel" class="gp-group-view gp-group-panel" aria-label="Membres en ligne" hidden></section>
+   </div>
+   <div class="group-chat-actions" hidden><button type="button" id="group-add-friend">+ Ajouter un ami</button><button type="button" id="group-leave">Quitter le groupe</button><button type="button" id="group-delete" hidden>Supprimer le groupe</button></div>
 </div></div>
 <div id="group-add-modal" class="group-overlay" hidden><div class="group-dialog" role="dialog" aria-modal="true" aria-labelledby="group-add-title">
   <div class="group-dialog-head"><h2 id="group-add-title">Ajouter un ami</h2><button type="button" data-close-group="group-add-modal" aria-label="Fermer">×</button></div>
   <div id="group-add-picker" class="group-friend-picker"></div>
 </div></div>
+<div id="group-details-modal" class="group-overlay" hidden><div class="group-dialog gp-details-dialog" role="dialog" aria-modal="true" aria-labelledby="group-details-title"><div class="group-dialog-head"><h2 id="group-details-title">Détails du groupe</h2><button type="button" data-close-group="group-details-modal">×</button></div><button type="button" id="group-details-avatar-button" class="gp-avatar-change" title="Choisir un avatar"><img id="group-details-avatar" alt="Avatar du groupe" hidden><span id="group-details-avatar-placeholder">👥</span><small>Changer l'avatar</small></button><h3 id="group-details-name"></h3><p id="group-details-description"></p><h4>Membres</h4><div id="group-details-members"></div></div></div>
+<div id="group-avatar-modal" class="group-overlay" hidden><div class="group-dialog gp-shop-dialog" role="dialog" aria-modal="true" aria-labelledby="group-avatar-title"><div class="group-dialog-head"><h2 id="group-avatar-title">Avatars de groupe · 100 Coins</h2><button type="button" data-close-group="group-avatar-modal">×</button></div><p id="group-avatar-balance"></p><div id="group-avatar-grid" class="gp-avatar-grid"></div><p id="group-avatar-status" role="status"></p></div></div>
 <!-- MESSAGERIE PRIVÉE -->
 <div id="private-chat-modal" class="private-chat-modal" hidden>
     <div class="private-chat-box"
@@ -561,7 +767,16 @@ document.addEventListener("DOMContentLoaded", () => {
                         } else if (event.kind === "group") {
                 const group = event.group;
                 const last = group.last_message || {};
-                const icon = el("span", "👥", "activity-game-icon");
+                const icon = el("span", "👥", "activity-game-icon gp-activity-group-avatar");
+                const avatarUrl = String(group.avatar_url || "").trim();
+                if (avatarUrl && ((avatarUrl.startsWith("/") && !avatarUrl.startsWith("//")) || /^https?:\/\//i.test(avatarUrl))) {
+                    const image = document.createElement("img");
+                    image.src = avatarUrl;
+                    image.alt = "";
+                    image.loading = "lazy";
+                    image.onerror = () => image.remove();
+                    icon.appendChild(image);
+                }
                 const author = (last.pseudo || last.username) ? (last.pseudo || last.username) + " : " : "";
                 content.append(el("strong", group.name || "Groupe d'amis"),
                                el("small", author + (last.content || "")));
@@ -617,24 +832,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const count = document.getElementById("social-requests-count");
     if (!list || !count) return;
     let loading = false;
+    let pendingRefresh = false;
     const empty = message => { list.replaceChildren(); const p = document.createElement("p"); p.textContent = message; list.appendChild(p); };
     async function refreshRequests() {
-        if (loading) return;
+        if (loading) { pendingRefresh = true; return; }
         loading = true;
         try {
             const token = localStorage.getItem("access_token");
             if (!token) { empty("Reconnecte-toi pour voir tes demandes."); return; }
             const response = await fetch("/api/users/friends/requests", {
-                headers: {Authorization: "Bearer " + token}
+                headers: {Authorization: "Bearer " + token},
+                cache: "no-store"
             });
             const raw = await response.text();
             let data;
             try { data = JSON.parse(raw); } catch { throw new Error("Réponse du serveur invalide (HTTP " + response.status + ")"); }
             if (!response.ok) throw new Error(data.error || data.msg || "Erreur HTTP " + response.status);
-            const requests = data.requests || [];
-            count.textContent = String(requests.length);
+            const requests = Array.isArray(data.requests) ? data.requests : [];
+            const sentRequests = Array.isArray(data.sent_requests) ? data.sent_requests : [];
+            count.textContent = String(requests.length + sentRequests.length);
             list.replaceChildren();
-            if (!requests.length) { empty("Aucune demande en attente."); return; }
+            if (!requests.length && !sentRequests.length) { empty("Aucune demande en attente."); return; }
             for (const request of requests) {
                 const row = document.createElement("div"); row.className = "social-request-row";
                 const avatar = document.createElement("span"); avatar.className = "social-request-avatar";
@@ -645,6 +863,34 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else avatar.textContent = "👤";
                 const name = document.createElement("strong"); name.className = "social-request-name";
                 name.textContent = request.pseudo || request.username || "Joueur";
+                  // Avatar et pseudo : ouvrir le profil de l'expéditeur.
+                const openRequesterProfile = () => {
+                    const playerId = Number(request.sender_id);
+                    if (!Number.isInteger(playerId) || playerId <= 0) {
+                        if (typeof showToast === "function") showToast("Identifiant du joueur indisponible.");
+                        return;
+                    }
+                    if (typeof window.openFullPlayerProfile === "function") {
+                        window.openFullPlayerProfile(playerId);
+                    } else if (typeof showToast === "function") {
+                        showToast("Le profil du joueur n'est pas disponible.");
+                    }
+                };
+                for (const element of [avatar, name]) {
+                    element.setAttribute("role", "button");
+                    element.setAttribute("tabindex", "0");
+                    element.setAttribute("aria-label", "Voir le profil de " + name.textContent);
+                    element.title = "Voir le profil";
+                    element.style.cursor = "pointer";
+                    element.addEventListener("click", openRequesterProfile);
+                    element.addEventListener("keydown", event => {
+                        if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            openRequesterProfile();
+                        }
+                    });
+                }
+                avatar.dataset.friendId = String(request.sender_id);
                 const actions = document.createElement("div"); actions.className = "social-request-actions";
                 async function respond(action) {
                     reject.disabled = accept.disabled = true;
@@ -660,6 +906,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (typeof showToast === "function") showToast(data.message || "Demande traitée.");
                         await refreshRequestsAfterAction();
                         if (typeof loadDashboardFriends === "function") await loadDashboardFriends();
+                        window.dispatchEvent(new Event("gpflsk:friendship-changed"));
                     } catch (error) {
                         reject.disabled = accept.disabled = false;
                         if (typeof showToast === "function") showToast(error.message);
@@ -678,13 +925,66 @@ document.addEventListener("DOMContentLoaded", () => {
                 row.append(avatar, name, actions);
                 list.appendChild(row);
             }
+            for (const request of sentRequests) {
+                const row = document.createElement("div");
+                row.className = "social-request-row";
+                const avatar = document.createElement("span");
+                avatar.className = "social-request-avatar";
+                if (request.avatar_url) {
+                    const img = document.createElement("img");
+                    img.src = request.avatar_url;
+                    img.alt = "";
+                    img.onerror = () => { img.remove(); avatar.textContent = "👤"; };
+                    avatar.appendChild(img);
+                } else avatar.textContent = "👤";
+                const name = document.createElement("strong");
+                name.className = "social-request-name";
+                name.textContent = request.pseudo || request.username || "Joueur";
+                const openProfile = () => {
+                    const playerId = Number(request.receiver_id);
+                    if (Number.isInteger(playerId) && playerId > 0 &&
+                        typeof window.openFullPlayerProfile === "function") {
+                        window.openFullPlayerProfile(playerId);
+                    } else if (typeof showToast === "function") {
+                        showToast("Le profil du joueur n'est pas disponible.");
+                    }
+                };
+                for (const element of [avatar, name]) {
+                    element.setAttribute("role", "button");
+                    element.setAttribute("tabindex", "0");
+                    element.setAttribute("aria-label", "Voir le profil de " + name.textContent);
+                    element.title = "Voir le profil";
+                    element.style.cursor = "pointer";
+                    element.addEventListener("click", openProfile);
+                    element.addEventListener("keydown", event => {
+                        if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            openProfile();
+                        }
+                    });
+                }
+                const status = document.createElement("span");
+                status.className = "social-request-actions";
+                status.setAttribute("role", "img");
+                status.setAttribute("aria-label", "Demande envoyée");
+                status.title = "Demande envoyée";
+                status.style.color = "#9fb0cf";
+                status.style.fontSize = "18px";
+                status.style.justifyContent = "center";
+                status.textContent = "◷";
+                row.append(avatar, name, status);
+                list.appendChild(row);
+            }
         } catch (error) { empty(error.message || "Impossible de charger les demandes."); }
-        finally { loading = false; }
+        finally { loading = false; if (pendingRefresh) { pendingRefresh = false; queueMicrotask(refreshRequests); } }
     }
     async function refreshRequestsAfterAction() {
         // Le clic a lieu pendant qu'aucun rafraîchissement périodique n'est en cours.
         await refreshRequests();
     }
+    window.refreshLobbyFriendRequests = refreshRequests;
+    window.addEventListener("gpflsk:friendship-changed", refreshRequests);
+    window.addEventListener("focus", refreshRequests);
     refreshRequests();
     setInterval(() => { if (!document.hidden) refreshRequests(); }, 10000);
     document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshRequests(); });

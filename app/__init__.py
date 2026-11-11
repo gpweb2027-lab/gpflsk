@@ -22,6 +22,7 @@ def create_app():
     from .auth.routes import auth_bp
     from .users.routes import users_bp
     from .groups.routes import groups_bp
+    from .groups.group_avatars_routes import group_avatars_bp
     from .rooms.routes import rooms_bp
     from .games.president.routes import president_bp
 
@@ -32,6 +33,7 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)
     app.register_blueprint(groups_bp)
+    app.register_blueprint(group_avatars_bp)
     app.register_blueprint(rooms_bp)
     app.register_blueprint(president_bp)
 
