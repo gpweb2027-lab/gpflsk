@@ -2678,3 +2678,111 @@ a {
 .gp-group-menu{position:absolute;z-index:5;right:16px;top:65px;background:#14213d;border:1px solid #34446a;border-radius:12px;padding:8px;box-shadow:0 12px 35px #0009}.gp-group-menu[hidden],.gp-group-panel[hidden]{display:none!important}.gp-group-menu button{display:block;width:100%;text-align:left;background:none;color:white;border:0;padding:12px;cursor:pointer}
 .gp-details-dialog,.gp-shop-dialog{width:min(560px,100%)}.gp-avatar-change{display:flex;flex-direction:column;align-items:center;gap:7px;margin:8px auto;background:none;border:0;color:#a7bbdd;cursor:pointer}.gp-avatar-change img{height:100px;width:100px;border-radius:50%;object-fit:cover}.gp-avatar-change span{font-size:66px}.gp-details-dialog h3{text-align:center}.gp-member{display:flex;gap:10px;align-items:center;padding:10px;border-bottom:1px solid #31436a}.gp-member img{width:35px;height:35px;border-radius:50%;object-fit:cover}.gp-avatar-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-height:50vh;overflow:auto}.gp-avatar-grid button{background:#1a2a4c;border:1px solid #34466f;color:#fff;border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:5px;align-items:center}.gp-avatar-grid img{width:75px;height:75px;object-fit:cover;border-radius:50%}.gp-avatar-grid small{color:#ffd36a}.gp-avatar-grid button:disabled{opacity:.7;cursor:default}
 @media(max-width:600px){.gp-avatar-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+.president-history-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(0, 0, 0, .78);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.president-history-modal {
+    position: relative;
+    width: min(100%, 520px);
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 28px;
+    border: 1px solid #354b78;
+    border-radius: 18px;
+    background: #101c35;
+    color: #fff;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .4);
+}
+
+.president-history-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: transparent;
+    border: 0;
+    color: white;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.president-history-modal h2 {
+    margin: 0 0 8px;
+    font-size: 22px;
+}
+
+.president-history-modal > p {
+    color: #aebfdd;
+    margin-bottom: 24px;
+}
+
+.president-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.president-history-player {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #293b5c;
+    border-radius: 12px;
+    background: #172641;
+    color: #fff;
+    text-align: left;
+    cursor: pointer;
+}
+
+.president-history-player:hover {
+    background: #22375b;
+}
+
+.president-history-player.is-winner {
+    border-color: #e4b84b;
+    background: #263047;
+}
+
+.president-history-rank {
+    width: 30px;
+    font-weight: 800;
+    color: #e4b84b;
+    text-align: center;
+}
+
+.president-history-avatar {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #304466;
+    display: grid;
+    place-items: center;
+}
+
+.president-history-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.president-history-name {
+    flex: 1;
+    font-weight: 700;
+}
+
+.president-history-position {
+    font-size: 12px;
+    color: #d8e0f3;
+}
